@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Unturned+ Overlay</title>
+  <!-- theme.css é o MESMO carregado pela janela principal -->
+  <link rel="stylesheet" href="theme.css" />
+  <link rel="stylesheet" href="overlay.css" />
+</head>
+<body>
+  <div class="hud">
+
+    <!-- Barra superior (arrastável) — espelha a topbar do app -->
+    <div class="hud-bar">
+      <span class="brand-mark">U+</span>
+      <span class="hud-title" id="ov-name">Unturned+</span>
+      <button id="ov-close" data-i18n-title="overlay.hide" title="Ocultar (F8)" data-icon="close"></button>
+    </div>
+
+    <div class="hud-body">
+
+      <!-- Nenhum servidor fixado -->
+      <div class="ov-message" id="ov-empty">
+        <span class="ov-message-icon" data-icon="pin"></span>
+        <span id="ov-empty-text">Nenhum servidor fixado. No app, abra o tracking de um
+        servidor e clique em "Fixar no overlay".</span>
+      </div>
+
+      <!-- Servidor fixado não respondeu -->
+      <div class="ov-message error hidden" id="ov-error">
+        <span class="ov-message-icon" data-icon="satellite"></span>
+        <span id="ov-error-text">O servidor não respondeu ao Query Port.</span>
+      </div>
+
+      <!-- Conteúdo -->
+      <div class="hidden" id="ov-main">
+
+        <!-- Cabeçalho do servidor (mesmo desenho do card da home) -->
+        <div class="ov-head">
+          <div class="ov-icon" id="ov-icon" data-icon="gamepad"></div>
+          <div class="ov-headtext">
+            <div class="ov-title-row">
+              <span class="live-chip hidden" id="ov-live">
+                <span class="live-dot"></span><span id="ov-live-text">Jogando agora</span>
+              </span>
+              <span class="ov-server-name" id="ov-server-name">—</span>
+            </div>
+            <div class="ov-address">
+              <span id="ov-flag"></span>
+              <span class="copy-ip" id="ov-ip" data-i18n-title="card.copyIp" title="Clique para copiar">—</span>
+            </div>
+          </div>
+          <span class="status-pill" id="ov-status">—</span>
+        </div>
+
+        <!-- Descrição do servidor, com o rich text do jogo -->
+        <div class="ov-desc urt-block" id="ov-desc"></div>
+
+        <!-- Três números principais -->
+        <div class="ov-stats" id="ov-stats">
+          <div class="ov-stat" id="ov-stat-players">
+            <span class="ov-stat-value" id="ov-players">—</span>
+            <span class="ov-stat-label" id="ov-label-players">Jogadores</span>
+          </div>
+          <div class="ov-stat">
+            <span class="ov-stat-value" id="ov-map">—</span>
+            <span class="ov-stat-label" id="ov-label-map">Mapa</span>
+          </div>
+          <div class="ov-stat">
+            <span class="ov-stat-value" id="ov-mods">—</span>
+            <span class="ov-stat-label" id="ov-label-mods">Mods</span>
+          </div>
+        </div>
+
+        <!-- Próximo wipe/evento. Uma linha só: dentro do jogo o que
+             importa é "falta quanto", não a agenda inteira. Só
+             aparece quando existe algo agendado. -->
+        <div class="ov-sched hidden" id="ov-sched">
+          <span class="ovs-ico" id="ov-sched-ico" data-icon="broom"></span>
+          <span class="ovs-name" id="ov-sched-name">—</span>
+          <span class="ovs-count" id="ov-sched-count">—</span>
+        </div>
+
+        <!-- Airdrop -->
+        <div class="ov-block ov-airdrop" id="ov-block-airdrop">
+          <div class="ov-block-title"><span id="ov-label-airdrop">Airdrop</span></div>
+          <div class="ov-ad-count" id="ov-ad-count">—</div>
+          <div class="ov-ad-sub" id="ov-ad-sub">Marque quando um airdrop cair</div>
+          <div class="ov-ad-actions">
+            <button class="ov-btn" id="ov-ad-fell"><span data-icon="parachute"></span> <span id="ov-label-fell">Caiu um airdrop</span></button>
+            <button class="ov-btn ghost" id="ov-ad-reset">Zerar</button>
+          </div>
+        </div>
+
+        <!-- Eventos recentes (join/leave detectados pelo Query Port) -->
+        <div class="ov-block" id="ov-block-events">
+          <div class="ov-block-title">
+            <span id="ov-label-events">Eventos recentes</span>
+            <span class="ov-count" id="ov-events-count">0</span>
+          </div>
+          <ul class="ov-list" id="ov-events"></ul>
+        </div>
+
+        <!-- Jogadores online -->
+        <div class="ov-block" id="ov-block-online">
+          <div class="ov-block-title">
+            <span id="ov-label-online">Online</span>
+            <span class="ov-count" id="ov-online-count">0</span>
+          </div>
+          <ul class="ov-list" id="ov-online"></ul>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="hud-foot">
+      <span id="ov-foot-hint">F8 mostrar/ocultar</span>
+      <span id="ov-ct">F9 modo fantasma</span>
+    </div>
+  </div>
+
+  <script src="js/i18n.js"></script>
+  <!-- O overlay também desenha ícone (jogo, wipe, entrou/saiu). Sem
+       este arquivo ele voltaria para emoji, e o overlay é
+       justamente onde emoji fica pior: fundo translúcido, texto
+       pequeno e cor do tema. -->
+  <script src="js/icons.js"></script>
+  <script src="js/richtext.js"></script>
+  <script src="js/geoflag.js"></script>
+  <script src="js/overlay.js"></script>
+</body>
+</html>

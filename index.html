@@ -1,0 +1,2905 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unturned+</title>
+  <!-- theme.css: cores e componentes compartilhados com o overlay -->
+  <link rel="stylesheet" href="theme.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- raid.css: a calculadora de raid é uma tela grande e isolada;
+       manter o estilo dela fora do styles.css evita que ela cresça
+       dentro de um arquivo que já é compartilhado por tudo. -->
+  <link rel="stylesheet" href="raid.css" />
+  <!-- inventory.css: inventário, editor de bases e grade de storage. -->
+  <link rel="stylesheet" href="inventory.css" />
+</head>
+<body>
+
+  <!-- ======================= TOPBAR ======================= -->
+  <header class="topbar">
+    <button class="btn-icon" id="btn-menu" data-i18n-title="nav.menu" title="Menu" data-icon="menu"></button>
+
+    <div class="brand" id="brand-home" data-i18n-title="nav.home" title="Home">
+      <!-- O ícone DE VERDADE, o mesmo do .ico da janela e da barra de
+           tarefas. O "U+" em texto era um desenho diferente do
+           ícone do app: duas marcas para a mesma coisa. -->
+      <img class="brand-mark" src="assets/icon.png" alt="Unturned+" />
+      <span class="brand-name">Unturned<em>+</em></span>
+    </div>
+
+    <div class="topbar-search">
+      <input type="text" id="search-input" data-i18n-ph="search.placeholder"
+             placeholder="Pesquisar por nome, tag ou pasta..." />
+    </div>
+
+    <!-- O canto fica com DUAS coisas só: notícias do app e você.
+         Ferramentas, overlay e configurações foram para o menu;
+         eram quatro engrenagens disputando o mesmo canto. -->
+    <nav class="topbar-actions">
+      <!-- Central de notificações. O balão avisa; esta lista LEMBRA.
+           Sem ela, todo aviso que aparece enquanto você está no jogo
+           deixa de existir depois de 4 segundos. -->
+      <button class="btn-icon" id="btn-notif" data-i18n-title="notif.title" title="Notificações">
+        <span data-icon="bell"></span>
+        <span class="news-badge hidden" id="notif-badge">0</span>
+      </button>
+
+      <button class="btn-icon news-btn" id="btn-news" data-i18n-title="nav.news" title="Notícias">
+        <span data-icon="news"></span>
+        <span class="news-badge hidden" id="news-badge">1</span>
+      </button>
+
+      <!-- VOCÊ, no canto. Foto + nome + SteamID, e nada mais.
+           A pílula "connected" e o botão "Conectar Steam" saíram
+           daqui: eram três coisas disputando o mesmo canto para
+           dizer uma só ("quem sou eu e estou conectada?"). Agora a
+           foto responde quem, o nome confirma, e a bolinha verde no
+           canto da foto responde o estado da rede. Sem conta, a
+           mesma peça vira o convite a conectar. -->
+      <button class="user-chip" id="btn-user" data-i18n-title="user.menu" title="Sua conta">
+        <span class="user-pic">
+          <img class="user-avatar hidden" id="user-avatar" alt=""
+               onerror="avatarFallback(this,'U')" />
+          <span class="user-fallback" id="user-fallback" data-icon="user"></span>
+        </span>
+        <span class="user-chip-id">
+          <strong class="user-chip-name" id="user-chip-name"
+                  data-i18n="user.connectShort">Conectar Steam</strong>
+          <span class="user-chip-sub hidden" id="user-chip-sub"></span>
+        </span>
+        <!-- Estado da rede. Bolinha só, sem texto: "online" escrito
+             por extenso no topo é uma palavra que ninguém lê duas
+             vezes. O texto vive no title e dentro do menu. -->
+        <span class="net-dot off" id="net-dot" title=""></span>
+        <span class="net-txt sr-only" id="net-txt"></span>
+      </button>
+    </nav>
+
+    <!-- Central de notificações -->
+    <div class="notif-menu hidden" id="notif-menu">
+      <div class="nm-top">
+        <strong data-i18n="notif.title">Notificações</strong>
+        <span style="flex:1"></span>
+        <button class="btn-small" id="notif-read-all" data-i18n="notif.markAll">Marcar todas como lidas</button>
+        <button class="btn-small danger" id="notif-clear" data-i18n="notif.clear">Limpar</button>
+      </div>
+      <div class="nm-list" id="notif-list"></div>
+    </div>
+
+    <!-- Menu da conta -->
+    <div class="user-menu hidden" id="user-menu">
+      <div class="um-head">
+        <img class="um-avatar hidden" id="um-avatar" alt="" onerror="avatarFallback(this,'U')" />
+        <span class="um-fallback" id="um-fallback" data-icon="user"></span>
+        <div class="um-id">
+          <strong id="um-name" data-i18n="user.notConnected">Sem conta conectada</strong>
+          <span class="muted small" id="um-sub"></span>
+        </div>
+      </div>
+      <button class="um-item" id="um-conta"><span data-icon="cloud"></span> <span id="um-conta-txt" data-i18n="conta.signIn">Entrar na sua conta</span></button>
+      <button class="um-item hidden" id="um-sair-conta"><span data-icon="logout"></span> <span data-i18n="conta.signOut">Sair da conta</span></button>
+      <hr />
+      <button class="um-item" id="um-connect"><span data-icon="link"></span> <span data-i18n="user.connect">Conectar conta Steam</span></button>
+      <button class="um-item" id="um-profile"><span data-icon="user"></span> <span data-i18n="user.openProfile">Abrir perfil na Steam</span></button>
+      <button class="um-item" id="um-friends"><span data-icon="users"></span> <span data-i18n="user.friends">Amigos jogando</span></button>
+      <hr />
+      <button class="um-item" id="um-settings"><span data-icon="gear"></span> <span data-i18n="nav.settings">Configurações</span></button>
+      <button class="um-item" id="um-welcome"><span data-icon="graduation"></span> <span data-i18n="welcome.replay">Rever a introdução</span></button>
+    </div>
+  </header>
+
+  <!-- ======================= MENU LATERAL ======================= -->
+  <!-- Fechado por padrão. Guarda as pastas e as ações principais. -->
+  <div class="drawer-scrim hidden" id="drawer-scrim"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <!-- O ícone DE VERDADE, o mesmo do .ico da janela e da barra de
+           tarefas. O "U+" em texto era um desenho diferente do
+           ícone do app: duas marcas para a mesma coisa. -->
+      <img class="brand-mark" src="assets/icon.png" alt="Unturned+" />
+      <span class="drawer-title" data-i18n="nav.menu">Menu</span>
+      <button class="drawer-close" id="drawer-close" aria-label="Fechar" data-icon="close"></button>
+    </div>
+
+    <div class="drawer-actions">
+      <button class="drawer-btn primary" id="drawer-add">
+        <span class="drawer-btn-icon" data-icon="plus"></span><span data-i18n="home.addServer">Adicionar servidor</span>
+      </button>
+      <button class="drawer-btn" id="drawer-new-folder">
+        <span class="drawer-btn-icon" data-icon="folder"></span><span data-i18n="folder.new">Nova pasta</span>
+      </button>
+      <button class="drawer-btn danger" id="drawer-delete">
+        <span class="drawer-btn-icon" data-icon="trash"></span><span id="drawer-delete-label" data-i18n="home.deleteMode">Excluir servidores</span>
+      </button>
+    </div>
+
+    <!-- Aplicativo: ladrilhos com ícone, subtítulo e estado. O
+         subtítulo existe porque "Overlay" sozinho não diz o que
+         faz para quem abriu o app pela primeira vez. -->
+    <div class="drawer-section">
+      <div class="drawer-section-title"><span data-i18n="nav.app">Aplicativo</span></div>
+      <div class="drawer-tiles">
+        <button class="drawer-tile" id="drawer-overlay">
+          <span class="dt-ico" data-icon="monitor"></span>
+          <span class="dt-body">
+            <span class="dt-title" data-i18n="nav.overlay">Overlay</span>
+            <span class="dt-sub" data-i18n="nav.overlaySub">Painel por cima do jogo · F8</span>
+          </span>
+          <span class="dt-state" id="drawer-overlay-state" data-i18n="nav.stateOff">desligado</span>
+        </button>
+        <button class="drawer-tile" id="drawer-events">
+          <span class="dt-ico" data-icon="calendar"></span>
+          <span class="dt-body">
+            <span class="dt-title" data-i18n="nav.agenda">Agenda</span>
+            <span class="dt-sub" data-i18n="nav.agendaSub">Wipes e eventos dos servidores</span>
+          </span>
+          <span class="dt-badge hidden" id="drawer-events-badge">0</span>
+          <span class="dt-caret">›</span>
+        </button>
+        <button class="drawer-tile" id="drawer-teams">
+          <span class="dt-ico" data-icon="users"></span>
+          <span class="dt-body">
+            <span class="dt-title" data-i18n="nav.teams">Times</span>
+            <span class="dt-sub" data-i18n="nav.teamsSub">Seu time e os servidores vinculados a ele</span>
+          </span>
+          <span class="dt-badge hidden" id="drawer-teams-badge">0</span>
+          <span class="dt-caret">&rsaquo;</span>
+        </button>
+        <button class="drawer-tile" id="drawer-raid">
+          <span class="dt-ico" data-icon="bomb"></span>
+          <span class="dt-body">
+            <span class="dt-title" data-i18n="nav.raid">Custo de raid</span>
+            <span class="dt-sub" data-i18n="nav.raidSub">Quantas cargas para derrubar o quê</span>
+          </span>
+          <span class="dt-caret">›</span>
+        </button>
+        <button class="drawer-tile" id="drawer-settings">
+          <span class="dt-ico" data-icon="gear"></span>
+          <span class="dt-body">
+            <span class="dt-title" data-i18n="nav.settings">Configurações</span>
+            <span class="dt-sub" data-i18n="nav.settingsSub">Idioma, atalhos, dados e backup</span>
+          </span>
+          <span class="dt-caret">›</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SERVIDORES DOS SEUS TIMES.
+         A Sara: "em vez de aparecer o histórico de servidores, já
+         aparecer os servidores vinculados a times."
+
+         Faz sentido: "onde o meu time joga" é uma pergunta que se
+         faz toda vez que se abre o app; "quais servidores eu abri
+         semana passada" quase nunca. A seção some inteira quando
+         não há vínculo nenhum — para quem não usa time, o menu
+         continua igual. -->
+    <div class="drawer-section hidden" id="drawer-teamservers-sec">
+      <div class="drawer-section-title">
+        <span data-i18n="nav.teamServers">Servidores dos times</span>
+        <span class="section-count" id="count-teamservers">0</span>
+      </div>
+      <div id="drawer-teamservers"></div>
+    </div>
+
+    <div class="drawer-section grow">
+      <div class="drawer-section-title">
+        <span data-i18n="home.folders">Pastas</span>
+        <span class="section-count" id="count-folders">0</span>
+      </div>
+      <button class="drawer-folder" id="drawer-all">
+        <span class="drawer-folder-icon" data-icon="clipboard"></span>
+        <span class="drawer-folder-body">
+          <span class="drawer-folder-name" data-i18n="folder.back">Todos os servidores</span>
+          <span class="drawer-folder-meta" id="drawer-all-meta"></span>
+        </span>
+      </button>
+      <div class="drawer-folders" id="grid-folders"></div>
+      <p class="muted small drawer-hint" id="drawer-folders-empty" data-i18n="folder.emptyHint">
+        Nenhuma pasta ainda. Crie uma para agrupar os servidores de uma mesma rede — dá para arrastar um card para dentro dela.
+      </p>
+    </div>
+  </aside>
+
+  <!-- ======================= TIMES =======================
+       ÁREA PRÓPRIA, fora da tela de servidor.
+
+       Antes o grupo era uma ABA DENTRO de um servidor: para ver o
+       time você precisava abrir um servidor qualquer primeiro, e o
+       time pairava sobre todos eles ao mesmo tempo. Isso é o oposto
+       do que ele é — o time é dono dos servidores, não o contrário.
+
+       Foi o pedido da Sara: "uma aba customizada apenas pro time.
+       Nessa aba, onde tem todas as informações do time, você pode
+       vincular servidores a um time."
+
+       O SELETOR DE SERVIDOR no topo é o que faz o isolamento
+       aparecer: "Todos" mostra os dois servidores ao mesmo tempo (é
+       o que ela pediu para poder consultar os dois de uma vez), e
+       escolher um deixa na tela só o que é daquele mapa.
+       ======================================================= -->
+  <main class="view hidden" id="view-team">
+    <div class="tracking-header">
+      <button class="btn btn-back" id="team-back" data-i18n-title="tracking.backTitle"
+              title="Voltar para a lista (Esc)">
+        <span class="bb-arrow" data-icon="back"></span><span data-i18n="tracking.back">Voltar</span>
+      </button>
+      <h1 data-i18n="nav.teams">Times</h1>
+      <span style="flex:1"></span>
+
+      <!-- Escopo: qual servidor deste time está sendo olhado. -->
+      <label class="tv-scope" id="tv-scope-box">
+        <span class="muted small" data-i18n="team.scope">Servidor</span>
+        <select id="tv-scope"></select>
+      </label>
+    </div>
+
+    <div class="tv-body">
+      <section class="panel panel-wide" id="panel-team">
+        <h2>
+          <span data-i18n="team.title">Time</span>
+          <button class="help-dot" data-help="team.help">?</button>
+          <span style="flex:1"></span>
+          <!-- Estado da rede: bolinha + palavra. O texto longo antigo
+               ("offline, servidor ainda não hospedado") ocupava meia
+               barra para dizer uma coisa que hoje é falsa. -->
+          <span class="team-status off" id="team-status">
+            <i class="ts-dot"></i><span class="ts-txt" id="team-status-txt"></span>
+          </span>
+        </h2>
+
+        <!-- Sem grupo: convite, e a verdade sobre o estado da rede -->
+        <div id="team-empty">
+          <p class="muted" data-i18n="team.emptyIntro">
+            Um time deixa você e seus amigos compartilharem marcadores, anotações,
+            prints e onde cada um está — tudo no mesmo servidor. Sozinho o app
+            continua funcionando exatamente igual.
+          </p>
+          <div class="team-warn">
+            <strong data-i18n="team.offlineTitle">Funciona com ou sem conta</strong>
+            <p data-i18n="team.offlineBody">
+              Com conta, o time vive no servidor e o que você compartilha chega
+              nos outros. Sem conta, tudo continua funcionando aqui no seu
+              computador — o time é seu e não sai daqui.
+            </p>
+          </div>
+          <div class="test-row">
+            <button class="btn primary" id="team-create" data-i18n="team.create">Criar time</button>
+            <button class="btn" id="team-join" data-i18n="team.join">Entrar com código</button>
+          </div>
+        </div>
+
+        <!-- Com grupo -->
+        <div id="team-body" class="hidden">
+          <div class="team-head">
+            <!-- A foto é um LINK EXTERNO (pedido da Sara). Enquanto
+                 não houver link, fica a inicial do nome, que é o que
+                 sempre esteve aqui — trocar por um quadrado cinza
+                 seria piorar o caso comum para acomodar o novo. -->
+            <span class="team-photo" id="team-photo">?</span>
+            <div class="team-id">
+              <div class="team-id-line">
+                <strong id="team-name"></strong>
+                <span class="role-chip" id="team-myrole"></span>
+              </div>
+              <span class="team-sub" id="team-sub"></span>
+              <p class="team-desc hidden" id="team-desc"></p>
+            </div>
+            <select id="team-picker" class="hidden"></select>
+            <span style="flex:1"></span>
+            <!-- As ações do grupo saíram da barra e foram para um
+                 menu. Renomear e Sair lado a lado, com Sair em
+                 vermelho, davam ao "sair" o mesmo peso visual de uma
+                 ação corriqueira — e ele é o único irreversível. -->
+            <div class="team-menu-wrap">
+              <button class="btn-icon" id="team-menu-btn"
+                      data-i18n-title="team.actions" title="Ações do time" data-icon="dots"></button>
+              <div class="team-menu hidden" id="team-menu">
+                <button class="tmn-item" id="team-edit">
+                  <span data-icon="edit"></span><span data-i18n="team.editProfile">Editar time</span>
+                </button>
+                <!-- "Renomear" saiu daqui: "Editar time" já muda o
+                     nome, e dois caminhos para a mesma coisa fazem a
+                     pessoa escolher entre eles sem ter informação
+                     para escolher. -->
+                <button class="tmn-item" id="team-copy-id">
+                  <span data-icon="copy"></span><span data-i18n="team.copyName">Copiar nome</span>
+                </button>
+                <div class="tmn-sep"></div>
+                <button class="tmn-item danger" id="team-leave">
+                  <span data-icon="logout"></span><span data-i18n="team.leave">Sair</span>
+                </button>
+                <!-- EXCLUIR é diferente de SAIR, e por isso são dois
+                     itens: sair tira você; excluir acaba com o time
+                     para todo mundo. Só o dono vê. -->
+                <button class="tmn-item danger hidden" id="team-delete">
+                  <span data-icon="trash"></span><span data-i18n="team.deleteTeam">Excluir time</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ORDEM DAS ABAS = ordem de uso.
+               Chat e Notas primeiro porque foi o pedido explícito
+               ("foque no chat e no sistema de notas compartilhadas").
+               Voz fica por último e DESLIGADA: o áudio existe, a
+               sinalização depende do servidor. Desligada e visível é
+               melhor que escondida — some da rota de cliques sem
+               fingir que o recurso nunca foi prometido.
+
+               A antiga aba "Compartilhado" não virou uma aba morta:
+               a lista dela é agora a aba Notas (com tipos), e o mapa
+               do time com "onde cada um está" virou a aba Mapa.
+               Apagar a aba junto com o conteúdo teria levado o mapa
+               do grupo embora sem ninguém pedir isso. -->
+          <nav class="team-tabs" id="team-tabs">
+            <button class="team-tab active" data-tt="chat"><span data-icon="comment"></span> <span data-i18n="team.tabChat">Chat</span><span class="tt-badge hidden" id="tt-badge-chat">0</span></button>
+            <button class="team-tab" data-tt="notes"><span data-icon="note"></span> <span data-i18n="team.tabNotes">Notas</span><span class="tt-badge hidden" id="tt-badge-notes">0</span></button>
+            <button class="team-tab" data-tt="board"><span data-icon="puzzle"></span> <span data-i18n="team.tabBoard">Mesa</span></button>
+            <button class="team-tab" data-tt="map"><span data-icon="pin"></span> <span data-i18n="team.tabMap">Mapa</span></button>
+            <button class="team-tab" data-tt="servers"><span data-icon="satellite"></span> <span data-i18n="team.tabServers">Servidores</span><span class="tt-badge hidden" id="tt-badge-servers">0</span></button>
+            <button class="team-tab" data-tt="members"><span data-icon="users"></span> <span data-i18n="team.members">Membros</span></button>
+            <button class="team-tab" data-tt="rules"><span data-icon="shield"></span> <span data-i18n="team.tabRules">Regras</span></button>
+            <button class="team-tab" data-tt="news"><span data-icon="news"></span> <span data-i18n="team.tabNews">Novidades</span><span class="tt-badge hidden" id="tt-badge-news">0</span></button>
+            <button class="team-tab off" data-tt="voice" id="tt-voice"><span data-icon="mic"></span> <span data-i18n="team.tabVoice">Voz</span><span class="tt-off" data-i18n="team.soon">em breve</span></button>
+          </nav>
+
+          <!-- ---------------- CHAT ---------------- -->
+          <!-- SERVIDORES DO TIME.
+               É aqui que se vincula. O botão de vincular só aparece
+               para quem tem a capacidade `server.link` — no seu time
+               você é dona e pode; no time de outra pessoa, só se te
+               derem admin. Esconder o botão sem permissão é melhor
+               que mostrá-lo e recusar depois do clique. -->
+          <div class="team-pane" id="ttpane-servers">
+            <div class="tvs-head">
+              <h3><span data-i18n="team.linkedServers">Servidores vinculados</span></h3>
+              <span style="flex:1"></span>
+              <button class="btn-small primary hidden" id="team-link-server">
+                <span data-icon="plus"></span> <span data-i18n="team.linkServer">Vincular servidor</span>
+              </button>
+            </div>
+            <p class="muted small" data-i18n="team.serversHelp">
+              Cada servidor vinculado guarda o que é dele: marcadores, posições e
+              anotações de um não aparecem no outro. Em cima, o seletor escolhe
+              qual deles você está olhando — ou os dois de uma vez.
+            </p>
+            <div id="team-servers"></div>
+          </div>
+
+          <div class="team-pane hidden" id="ttpane-chat">
+            <div class="chat-wrap">
+              <aside class="chat-channels">
+                <div class="cc-head">
+                  <span data-i18n="team.channels">Canais</span>
+                  <button class="btn-small" id="chat-new-channel" data-i18n-title="team.newChannel" title="Novo canal" data-icon="plus"></button>
+                </div>
+                <div id="chat-channel-list"></div>
+              </aside>
+              <div class="chat-main">
+                <div class="chat-log" id="chat-log"></div>
+                <div class="chat-attach hidden" id="chat-attach"></div>
+                <div class="chat-compose">
+                  <button class="btn-icon" id="chat-media" data-i18n-title="team.attach" title="Anexar" data-icon="link"></button>
+                  <textarea id="chat-input" rows="1"
+                            data-i18n-ph="team.messagePlaceholder" placeholder="Escreva uma mensagem..."></textarea>
+                  <button class="btn primary chat-send" id="chat-send">
+                    <span data-icon="send"></span> <span data-i18n="team.send">Enviar</span>
+                  </button>
+                </div>
+                <p class="muted small" id="chat-hint"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ---------------- VOZ ---------------- -->
+          <div class="team-pane hidden" id="ttpane-voice">
+            <div class="voice-warn">
+              <strong data-i18n="voice.offlineTitle">A sala de voz precisa do servidor</strong>
+              <p data-i18n="voice.offlineBody">
+                O áudio está pronto: captura, codec e reprodução funcionam hoje. O que
+                falta é a sinalização — a parte que apresenta um jogador ao outro.
+                O teste abaixo roda a pilha WebRTC inteira na sua máquina; se ele
+                passar, o problema nunca vai ser o seu microfone.
+              </p>
+            </div>
+
+            <div class="voice-grid">
+              <div class="voice-col">
+                <h3 data-i18n="voice.device">Microfone</h3>
+                <select id="voice-input" class="map-select"></select>
+                <div class="voice-meter"><div class="vm-bar" id="voice-level"></div></div>
+                <div class="test-row">
+                  <button class="btn-small primary" id="voice-test" data-i18n="voice.test">Testar microfone</button>
+                  <button class="btn-small" id="voice-refresh-dev" data-i18n="voice.refresh">Atualizar lista</button>
+                </div>
+                <div class="test-result hidden" id="voice-result"></div>
+              </div>
+
+              <div class="voice-col">
+                <h3 data-i18n="voice.output">Saída de áudio</h3>
+                <select id="voice-output" class="map-select"></select>
+                <label class="field">
+                  <span data-i18n="voice.volume">Volume dos outros</span>
+                  <input type="range" id="voice-gain" min="0" max="200" value="100" />
+                </label>
+                <label class="check">
+                  <input type="checkbox" id="voice-ptt" />
+                  <span data-i18n="voice.ptt">Falar só apertando a tecla (push-to-talk)</span>
+                  <button class="help-dot" data-help="voice.pttHelp">?</button>
+                </label>
+                <div class="test-row">
+                  <button class="btn-small" id="voice-mute" data-i18n="voice.mute">Mudo</button>
+                  <button class="btn-small" id="voice-deafen" data-i18n="voice.deafen">Surdo</button>
+                </div>
+              </div>
+            </div>
+
+            <h3 data-i18n="voice.room">Na sala</h3>
+            <div id="voice-peers"><p class="muted small" data-i18n="voice.empty">Ninguém na sala.</p></div>
+          </div>
+
+          <!-- ---------------- MEMBROS ---------------- -->
+          <div class="team-pane hidden" id="ttpane-members">
+            <div class="team-cols">
+              <div class="team-col">
+                <div class="col-head">
+                  <h3><span data-i18n="team.members">Membros</span></h3>
+                  <span class="col-count" id="members-count"></span>
+                </div>
+                <!-- Busca só aparece quando a lista cresce: um campo
+                     de busca sobre três nomes é decoração. -->
+                <input type="text" class="col-search hidden" id="members-search"
+                       data-i18n-ph="team.searchMember" placeholder="Buscar membro..." />
+                <div id="team-members"></div>
+              </div>
+              <div class="team-col">
+                <div class="col-head">
+                  <h3>
+                    <span data-i18n="team.invites">Convites</span>
+                    <button class="help-dot" data-help="team.inviteHelp">?</button>
+                  </h3>
+                  <span class="col-count" id="invites-count"></span>
+                </div>
+
+                <!-- O convite virou um cartão: escolher o papel e
+                     gerar são um gesto só, e o papel escolhido é a
+                     informação mais importante ali (define o que a
+                     pessoa vai poder fazer). -->
+                <div class="invite-card" id="invite-actions">
+                  <label class="field inline">
+                    <span data-i18n="team.inviteAs">Entrar como</span>
+                    <select id="invite-role" class="map-select"></select>
+                  </label>
+                  <button class="btn primary" id="invite-create">
+                    <span data-icon="link"></span> <span data-i18n="team.newInvite">Gerar convite</span>
+                  </button>
+                </div>
+
+                <div id="invite-list"></div>
+
+                <div id="team-bans-wrap" class="hidden">
+                  <h3 data-i18n="team.banned">Banidos</h3>
+                  <div id="team-bans"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ---------------- COMPARTILHADO ---------------- -->
+          <div class="team-pane hidden" id="ttpane-map">
+            <!-- O mapa do grupo. Mostra SÓ o que o grupo compartilhou,
+                 com o fundo esmaecido: dá para ver tudo de uma vez sem
+                 sair da aba, e clicar leva ao ponto. Antes a coordenada
+                 aparecia escrita e você tinha que procurar no mapa
+                 grande, no olho. -->
+            <!-- QUAL SERVIDOR o mapa mostra.
+                 O time pode ter mais de um servidor vinculado, e
+                 coordenada de um não quer dizer nada no outro. Sem
+                 escolher, o mapa não sabe qual imagem carregar — era
+                 por isso que ele ficava preto pedindo "abra um
+                 servidor com mapa". -->
+            <div class="tmap-bar">
+              <label class="tmap-pick">
+                <span data-i18n="team.mapServer">Mapa de</span>
+                <select id="team-map-server" class="map-select"></select>
+              </label>
+              <span style="flex:1"></span>
+              <button class="btn-small" id="team-map-mark">
+                <span data-icon="pin"></span> <span data-i18n="team.addMarker">Colocar marcador</span>
+              </button>
+            </div>
+            <div class="team-mapbox">
+              <canvas id="team-map"></canvas>
+              <p class="muted small team-maphint" data-i18n="team.mapHint">
+                Um clique seleciona; dois cliques abrem no mapa grande.
+              </p>
+            </div>
+            <div class="team-cols">
+              <div class="team-col">
+                <h3>
+                  <span data-i18n="team.positions">Onde cada um está</span>
+                  <button class="help-dot" data-help="team.positionHelp">?</button>
+                </h3>
+                <div id="team-positions"></div>
+                <div class="test-row">
+                  <button class="btn-small primary" id="team-here" data-i18n="team.imHere">Estou aqui</button>
+                  <button class="btn-small" id="team-here-clear" data-i18n="team.clearPos">Limpar</button>
+                </div>
+                <label class="check">
+                  <input type="checkbox" id="team-show-map" checked />
+                  <span data-i18n="team.showOnMap">Mostrar o time no mapa</span>
+                </label>
+              </div>
+              <div class="team-col">
+                <h3><span data-i18n="team.mapLegend">O que está no mapa</span></h3>
+                <p class="muted small" data-i18n="team.mapLegendHelp">
+                  Só o que tem coordenada aparece aqui. Notas, fichas e planos
+                  ficam na aba Notas — e os que marcam um ponto aparecem nos dois.
+                </p>
+                <div id="team-mapitems"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ---------------- NOTAS DO TIME ---------------- -->
+          <div class="team-pane hidden" id="ttpane-notes">
+            <div id="team-notes"></div>
+          </div>
+
+          <!-- ---------------- MESA DE INVESTIGAÇÃO ---------------- -->
+          <div class="team-pane hidden" id="ttpane-board">
+            <div id="team-board"></div>
+          </div>
+
+          <!-- ---------------- REGRAS ---------------- -->
+          <!-- Um texto só, do time inteiro. Não é uma lista de itens
+               porque regra não se comenta nem se ordena: ou vale, ou
+               não vale. Quem escreve é dono/admin; todo mundo lê. -->
+          <div class="team-pane hidden" id="ttpane-rules">
+            <div class="tvs-head">
+              <h3><span data-i18n="team.tabRules">Regras</span></h3>
+              <span class="muted small" id="rules-by"></span>
+              <span style="flex:1"></span>
+              <button class="btn-small primary hidden" id="rules-edit">
+                <span data-icon="edit"></span> <span data-i18n="common.edit">Editar</span>
+              </button>
+              <button class="btn-small primary hidden" id="rules-save">
+                <span data-icon="check"></span> <span data-i18n="common.save">Salvar</span>
+              </button>
+              <button class="btn-small hidden" id="rules-cancel" data-i18n="common.cancel">Cancelar</button>
+            </div>
+            <div class="rules-view" id="rules-view"></div>
+            <textarea class="rules-edit hidden" id="rules-text" rows="14"
+                      data-i18n-ph="team.rulesPlaceholder"
+                      placeholder="1. Não atirar em aliado.&#10;2. Avisar antes de raidar."></textarea>
+            <p class="muted small hidden" id="rules-noperm" data-i18n="team.rulesNoPerm">
+              Só o dono e os admins do time escrevem aqui. Você pode ler.
+            </p>
+          </div>
+
+          <!-- ---------------- NOVIDADES ---------------- -->
+          <div class="team-pane hidden" id="ttpane-news">
+            <div class="tvs-head">
+              <h3><span data-i18n="team.tabNews">Novidades</span></h3>
+              <span style="flex:1"></span>
+              <button class="btn-small primary hidden" id="news-new">
+                <span data-icon="plus"></span> <span data-i18n="team.newPost">Escrever</span>
+              </button>
+            </div>
+            <p class="muted small hidden" id="news-noperm" data-i18n="team.newsNoPerm">
+              Só o dono e os admins do time publicam aqui.
+            </p>
+            <div id="team-news"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ======================= HOME ======================= -->
+  <main class="view" id="view-home">
+    <!-- A conta mora SÓ no canto superior direito. Ter o mesmo
+         perfil em dois lugares na mesma tela era repetição: dois
+         "Conectar Steam" competindo pela mesma atenção. -->
+    <div class="home-header">
+      <h1 data-i18n="home.title">Meus servidores</h1>
+      <p class="muted" id="home-count"></p>
+    </div>
+
+    <!-- Servidor atual (jogando agora) — card especial em destaque -->
+    <section class="current-server hidden" id="current-server">
+      <div class="cs-badge" id="cs-badge">
+        <span class="cs-pulse"></span>
+        <span data-i18n="current.playingNow">Jogando agora</span>
+      </div>
+      <div class="cs-card" id="cs-card">
+        <div class="cs-icon" id="cs-icon" data-icon="gamepad"></div>
+        <div class="cs-body">
+          <div class="cs-name" id="cs-name"></div>
+          <div class="cs-desc urt-block" id="cs-desc"></div>
+          <div class="cs-meta" id="cs-meta"></div>
+          <div class="cs-chips" id="cs-chips"></div>
+        </div>
+        <div class="cs-actions">
+          <button class="btn-small" id="cs-quick" data-i18n="quick.title">Quick view</button>
+          <button class="btn-small" id="cs-open" data-i18n="current.open">Abrir</button>
+          <button class="btn-small primary" id="cs-add" data-i18n="current.add">Adicionar aos meus servidores</button>
+        </div>
+      </div>
+      <button class="cs-manual-link" id="cs-manual" data-i18n="current.setManual">Definir manualmente / apontar o log</button>
+    </section>
+
+    <!-- Barra de navegação de pasta (visível ao entrar numa pasta) -->
+    <div class="folder-bar hidden" id="folder-bar">
+      <button class="btn-ghost" id="folder-back"><span data-icon="back"></span> <span data-i18n="folder.back">Todos os servidores</span></button>
+      <span class="folder-crumb" id="folder-crumb"></span>
+      <span style="flex:1"></span>
+      <button class="btn-small" id="folder-edit" data-i18n="folder.edit">Editar pasta</button>
+      <button class="btn-small danger" id="folder-delete" data-i18n="folder.delete">Excluir pasta</button>
+    </div>
+
+    <!-- Servidores onde amigos da Steam estão jogando -->
+    <section class="home-section hidden" id="section-friends">
+      <h2 class="section-title">
+        <span class="section-steam" data-icon="gamepad"></span>
+        <span data-i18n="friends.title">Amigos jogando</span>
+        <span class="section-count" id="count-friends">0</span>
+        <button class="btn-ghost small" id="friends-refresh" data-i18n="friends.refresh">Atualizar</button>
+      </h2>
+      <p class="muted small hidden" id="friends-note"></p>
+      <div class="cards-grid" id="grid-friends"></div>
+    </section>
+
+    <!-- Favoritos (sempre no topo, separados) -->
+    <section class="home-section hidden" id="section-favorites">
+      <h2 class="section-title"><span class="section-star" data-icon="star"></span>
+        <span data-i18n="home.favorites">Favoritos</span>
+        <span class="section-count" id="count-favorites">0</span>
+      </h2>
+      <div class="cards-grid" id="grid-favorites"></div>
+    </section>
+
+    <!-- Demais servidores -->
+    <section class="home-section" id="section-servers">
+      <h2 class="section-title"><span data-i18n="home.allServers">Servidores</span>
+        <span class="section-count" id="count-servers">0</span>
+      </h2>
+      <div class="cards-grid" id="cards-grid"></div>
+    </section>
+
+    <div class="empty-state hidden" id="empty-state">
+      <div class="empty-icon" data-icon="satellite"></div>
+      <h2 data-i18n="home.emptyTitle">Nenhum servidor adicionado</h2>
+      <p data-i18n="home.emptyText">Use o botão + para adicionar um servidor por IP ou ID do BattleMetrics.</p>
+    </div>
+
+    <!-- Barra do modo de exclusão (só aparece com o modo ligado) -->
+    <div class="delete-bar hidden" id="delete-bar">
+      <span id="delete-bar-text"></span>
+      <span style="flex:1"></span>
+      <button class="btn-small" id="delete-bar-cancel" data-i18n="common.cancel">Cancelar</button>
+      <button class="btn-small danger" id="delete-bar-confirm" data-i18n="common.delete">Excluir</button>
+    </div>
+  </main>
+
+  <!-- ======================= TRACKING ======================= -->
+  <main class="view hidden" id="view-tracking">
+    <div class="tracking-header">
+      <!-- Botão de verdade, com borda. Era um texto cinza do lado do
+           título e passava despercebido: a pessoa entrava no
+           servidor e não achava o caminho de volta. -->
+      <button class="btn btn-back" id="btn-back" data-i18n-title="tracking.backTitle"
+              title="Voltar para a lista (Esc)">
+        <span class="bb-arrow" data-icon="back"></span><span data-i18n="tracking.back">Voltar</span>
+      </button>
+      <h1 id="tk-name"></h1>
+      <button class="tk-fav" id="tk-fav" data-i18n-title="card.favorite" title="Marcar como favorito" data-icon="star"></button>
+      <span class="status-pill" id="tk-status"></span>
+    </div>
+
+    <nav class="tk-tabs" id="tk-tabs" role="tablist">
+      <button class="tk-tab active" data-tk="overview"><span class="tk-tab-ico" data-icon="chart"></span><span data-i18n="tab.overview">Visão geral</span></button>
+      <button class="tk-tab" data-tk="players"><span class="tk-tab-ico" data-icon="users"></span><span data-i18n="tab.players">Jogadores</span><span class="tk-tab-badge" id="tab-badge-players">0</span></button>
+      <button class="tk-tab" data-tk="map"><span class="tk-tab-ico" data-icon="map"></span><span data-i18n="tab.map">Mapa</span></button>
+      <button class="tk-tab" data-tk="inventory"><span class="tk-tab-ico" data-icon="backpack"></span><span data-i18n="tab.inventory">Inventário</span></button>
+      <button class="tk-tab" data-tk="notes"><span class="tk-tab-ico" data-icon="note"></span><span data-i18n="tab.notes">Notas</span><span class="tk-tab-badge" id="tab-badge-notes">0</span></button>
+      <button class="tk-tab" data-tk="board"><span class="tk-tab-ico" data-icon="puzzle"></span><span data-i18n="tab.board">Mesa</span></button>
+      <!-- A aba "Grupo" SAIU daqui. O time virou área própria (ver
+           #view-team): ele é dono dos servidores, não um pedaço de
+           um servidor. O caminho de volta para dentro do servidor é
+           o bloco de time no painel de informações, logo abaixo. -->
+      <button class="tk-tab" data-tk="logs"><span class="tk-tab-ico" data-icon="list"></span><span data-i18n="tab.logs">Logs</span></button>
+      <button class="tk-tab" data-tk="history"><span class="tk-tab-ico" data-icon="chart"></span><span data-i18n="tab.history">Histórico</span></button>
+    </nav>
+    <div class="tk-pane" id="tkpane-overview">
+      <div class="tracking-grid">
+      <section class="panel" id="panel-info">
+        <h2><span data-i18n="tracking.serverInfo">Informações do servidor</span><button class="help-dot" data-help="help.serverInfo">?</button></h2>
+        <dl class="info-list">
+          <div><dt data-i18n="tracking.players">Jogadores</dt><dd id="tk-players"></dd></div>
+          <div><dt>IP:Port</dt><dd><span class="copy-ip" id="tk-address" data-i18n-title="card.copyIp" title="Clique para copiar"></span></dd></div>
+          <div class="loc-row"><dt data-i18n="tracking.location">Localização</dt>
+            <dd><div class="loc-value" id="tk-location"></div></dd></div>
+          <div><dt data-i18n="tracking.map">Mapa</dt><dd id="tk-map"></dd></div>
+          <div><dt data-i18n="tracking.uptime">Uptime</dt><dd id="tk-uptime"></dd></div>
+          <div><dt data-i18n="tracking.lastUpdate">Última atualização</dt><dd id="tk-updated"></dd></div>
+        </dl>
+
+        <!-- Agenda deste servidor. Fica aqui, junto do resto da
+             informação, em vez de virar mais uma aba: a pergunta
+             "quando é o wipe?" é da mesma família de "quantos
+             jogadores tem?". -->
+        <!-- TIME DESTE SERVIDOR.
+             A Sara: "se tu tem colado, tu pode também checar dentro
+             dos servidores vinculados, abrindo o card de informação,
+             as informações de time que estão lá."
+
+             Fica junto do resto da informação do servidor, e não
+             como aba: "de que time é este servidor?" é da mesma
+             família de "quantos jogadores tem?". Some inteiro quando
+             o servidor não é de time nenhum — bloco vazio dizendo
+             "nenhum time" é ruído em toda tela de quem não usa
+             time. -->
+        <div class="tk-team hidden" id="tk-team">
+          <div class="tkt-head">
+            <span data-i18n="team.ofThisServer">Time deste servidor</span>
+          </div>
+          <div id="tk-team-list"></div>
+        </div>
+
+        <div class="tk-sched" id="tk-sched">
+          <div class="tks-head">
+            <span data-i18n="sched.tabTitle">Agenda deste servidor</span>
+            <button class="btn-icon small" id="tk-sched-add"
+                    data-i18n-title="sched.addHere" title="Agendar wipe ou evento" data-icon="plus"></button>
+          </div>
+          <div id="tk-sched-list"></div>
+        </div>
+        <div class="panel-actions">
+          <button class="btn btn-primary" id="btn-join" data-i18n="tracking.join">Entrar no servidor</button>
+          <button class="btn" id="btn-bm" data-i18n="tracking.openBM">Abrir no BattleMetrics</button>
+          <button class="btn" id="btn-pin-overlay" data-i18n="tracking.pinOverlay"><span data-icon="pin"></span> Fixar no overlay</button>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-details">
+        <h2 data-i18n="details.title">Detalhes &amp; Mods</h2>
+        <dl class="info-list" id="details-fields">
+          <div class="desc-row"><dt data-i18n="details.description">Descrição</dt>
+            <dd><div class="urt-block" id="tk-desc"></div></dd></div>
+          <div><dt data-i18n="details.gameMode">Modo</dt><dd id="tk-gamemode"></dd></div>
+          <div><dt data-i18n="details.pvp">PvP/PvE</dt><dd id="tk-pvp"></dd></div>
+          <div><dt data-i18n="details.rocket">RocketMod</dt><dd id="tk-rocket"></dd></div>
+          <div><dt data-i18n="details.version">Versão</dt><dd id="tk-version"></dd></div>
+        </dl>
+
+        <div class="details-mods">
+          <h3><span data-i18n="details.mods">Mods do Workshop</span>
+            <span class="count-badge" id="tk-mod-count">0</span>
+            <button class="btn-ghost small" id="btn-refresh-mods" data-i18n="details.refreshMods">Atualizar da Steam</button>
+          </h3>
+
+          <div class="list-tools hidden" id="mods-tools">
+            <input type="text" id="mods-search" class="list-search"
+                   data-i18n-ph="details.searchMods" placeholder="Buscar mod pelo nome ou ID..." />
+            <span class="list-result" id="mods-result"></span>
+          </div>
+
+          <ul class="mods-list scroll-list" id="tk-mods"></ul>
+          <p class="muted small" id="tk-mods-empty" data-i18n="details.modsEmpty">
+            Nenhum mod detectado nas rules públicas deste servidor (ou o servidor não publica a lista).
+          </p>
+        </div>
+
+        <button class="btn-ghost small" id="btn-toggle-rules" data-i18n="details.showRaw">Ver todas as rules</button>
+        <div class="raw-rules hidden" id="tk-raw-rules"></div>
+      </section>
+
+      <section class="panel" id="panel-airdrop">
+        <h2><span data-i18n="airdrop.title">Airdrop</span><button class="help-dot" data-help="help.airdrop">?</button></h2>
+        <div class="airdrop-box">
+          <div class="airdrop-count" id="tk-airdrop-count"></div>
+          <p class="muted small" id="tk-airdrop-sub" data-i18n="airdrop.idle">
+            Clique em "Caiu um airdrop" quando um cair no jogo para iniciar a contagem.
+          </p>
+        </div>
+        <div class="airdrop-actions">
+          <button class="btn btn-primary" id="btn-airdrop-fell" data-i18n="airdrop.fell"><span data-icon="parachute"></span> Caiu um airdrop</button>
+          <button class="btn" id="btn-airdrop-reset" data-i18n="airdrop.reset">Zerar</button>
+        </div>
+        <label class="airdrop-interval">
+          <span data-i18n="airdrop.interval">Intervalo (segundos)</span>
+          <input type="number" id="tk-airdrop-interval" min="30" step="30" />
+        </label>
+        <p class="muted small" id="tk-airdrop-source"></p>
+      </section>
+      </div>
+    </div>
+    <div class="tk-pane hidden" id="tkpane-players">
+      <div class="tracking-grid">
+      <section class="panel" id="panel-players">
+        <h2><span data-i18n="tracking.playersOnline">Jogadores online</span>
+          <span class="count-badge" id="players-count">0</span>
+          <button class="help-dot" data-help="players.help">?</button></h2>
+
+        <!-- Legenda dos dois tempos. Sem ela, "total" parece bug. -->
+        <div class="players-legend">
+          <span class="pl-key now"><em data-i18n="players.session">sessão</em>
+            <span data-i18n="players.sessionLegend">tempo conectado agora</span></span>
+          <span class="pl-key total"><em data-i18n="players.total">total</em>
+            <span data-i18n="players.totalLegend">tudo que este app já viu neste servidor</span></span>
+        </div>
+
+        <div class="list-tools hidden" id="players-tools">
+          <input type="text" id="players-search" class="list-search"
+                 data-i18n-ph="tracking.searchPlayers" placeholder="Buscar jogador..." />
+          <span class="list-result" id="players-result"></span>
+        </div>
+
+        <!-- Selecionar vários (Ctrl+clique) para agrupar de uma vez.
+             Aparece só quando há seleção: barra fixa vazia é espaço
+             gasto em toda tela para uma ação que quase nunca é usada. -->
+        <div class="ficha-bar hidden" id="ficha-bar">
+          <span id="ficha-bar-txt"></span>
+          <span style="flex:1"></span>
+          <button class="btn-small" id="ficha-bar-clear" data-i18n="common.cancel">Cancelar</button>
+          <button class="btn-small primary" id="ficha-bar-group" data-i18n="fichas.groupSelected">Agrupar</button>
+        </div>
+        <ul class="players-list scroll-list" id="players-list"></ul>
+      </section>
+      </div>
+    </div>
+    <div class="tk-pane hidden" id="tkpane-map">
+      <div class="tracking-grid">
+      <section class="panel" id="panel-map">
+        <h2><span data-i18n="tracking.mapTitle">Mapa interativo</span><button class="help-dot" data-help="help.map">?</button></h2>
+
+        <!-- Barra em GRUPOS. Antes eram sete botões soltos em fila
+             e não dava para saber o que era ação, o que era modo e
+             o que era configuração. Agora: ação principal à
+             esquerda, ferramentas no meio, visualização à direita. -->
+        <div class="map-bar">
+          <div class="map-group primary-group">
+            <!-- UM ícone só. Antes eram dois — um alfinete e um mais.
+                 O alfinete é VERDE (a cor indicativa dele) e o fundo
+                 do botão primário também é verde, então ele nunca
+                 apareceu: sobrava o "+" ocupando o lugar do segundo
+                 ícone, e o botão parecia ter o ícone empurrado para
+                 a direita. Não estava descentralizado — estava com
+                 um ícone invisível na frente. -->
+            <button class="map-btn primary" id="btn-marker-mode">
+              <span class="mb-ico" data-icon="plus"></span>
+              <span data-i18n="map.addMarker">Novo marcador</span>
+            </button>
+            <button class="map-btn" id="btn-marker-move" data-i18n-title="markers.moveMode"
+                    title="Mover marcadores (ou segure Shift e arraste)">
+              <span class="mb-ico" data-icon="hand"></span>
+              <span class="mb-txt" data-i18n="markers.moveShort">Mover</span>
+            </button>
+          </div>
+
+          <div class="map-group">
+            <button class="map-btn" id="btn-extract-nodes" data-i18n-title="map.extractNodes" title="Extrair nomes do mapa">
+              <span class="mb-ico" data-icon="tag"></span>
+              <span class="mb-txt" data-i18n="map.extractShort">Extrair do jogo</span>
+            </button>
+            <button class="map-btn" id="btn-markers-bulk" data-i18n-title="markers.manage" title="Gerenciar marcadores">
+              <span class="mb-ico" data-icon="clipboard"></span>
+              <span class="mb-txt" data-i18n="markers.manageShort">Gerenciar</span>
+            </button>
+            <!-- MOSTRAR O TIME NO MAPA DO SERVIDOR.
+                 O interruptor existia só lá dentro da área do time,
+                 que é o lugar onde ninguém está quando quer ver os
+                 amigos no mapa. Aqui ele fica onde se olha. Só
+                 aparece para quem tem time — para quem joga sozinho
+                 seria um botão que não faz nada. -->
+            <button class="map-btn hidden" id="btn-map-team" data-i18n-title="team.showOnMap"
+                    title="Mostrar o time no mapa">
+              <span class="mb-ico" data-icon="users"></span>
+              <span class="mb-txt" data-i18n="team.showOnMapShort">Time</span>
+            </button>
+            <button class="help-dot" data-help="help.extractNodes">?</button>
+          </div>
+
+          <span class="map-spacer"></span>
+
+          <div class="map-group">
+            <select id="map-view-select" class="map-select">
+              <option value="map" data-i18n="map.viewMap">Satélite</option>
+              <option value="chart" data-i18n="map.viewChart">Carta</option>
+            </select>
+            <button class="map-btn icon-only" id="btn-map-zoom-out" data-i18n-title="map.zoomOut" title="Menos zoom" data-icon="minus"></button>
+            <button class="map-btn icon-only" id="btn-map-zoom-reset" data-i18n-title="map.resetZoom" title="1x">1x</button>
+            <button class="map-btn icon-only" id="btn-map-zoom-in" data-i18n-title="map.zoomIn" title="Mais zoom" data-icon="plus"></button>
+            <button class="map-btn icon-only" id="btn-map-full" data-i18n-title="map.fullscreen" title="Tela cheia" data-icon="external"></button>
+          </div>
+
+          <!-- Menu "…" para o que é raro: importar mapas e JSON.
+               São coisas que se faz uma vez e depois nunca mais. -->
+          <div class="map-group">
+            <button class="map-btn icon-only" id="btn-map-more" data-i18n-title="map.more" title="Mais" data-icon="dots"></button>
+            <div class="map-menu hidden" id="map-menu">
+              <button class="mm-item" id="btn-import-maps"><span data-icon="map"></span> <span data-i18n="map.import">Importar mapas do jogo</span>
+              </button>
+              <button class="mm-item" id="btn-import-markers"><span data-icon="download"></span> <span data-i18n="map.importJson">Importar marcadores (JSON)</span>
+              </button>
+              <button class="mm-item" id="btn-marker-cats"><span data-icon="tag"></span> <span data-i18n="markers.catsTitle">Minhas categorias</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="map-layers">
+          <label class="layer-chip"><input type="checkbox" class="layer-toggle" data-layer="location" checked />
+            <span class="lc-ico" data-icon="pin"></span><span data-i18n="map.tLocation">Locais</span></label>
+          <label class="layer-chip"><input type="checkbox" class="layer-toggle" data-layer="airdrop" checked />
+            <span class="lc-ico" data-icon="parachute"></span><span data-i18n="map.tAirdrop">Airdrops</span></label>
+          <label class="layer-chip"><input type="checkbox" class="layer-toggle" data-layer="item" checked />
+            <span class="lc-ico" data-icon="box"></span><span data-i18n="map.tItem">Itens</span></label>
+          <label class="layer-chip"><input type="checkbox" class="layer-toggle" data-layer="custom" checked />
+            <span class="lc-ico" data-icon="star"></span><span data-i18n="map.tCustom">Custom</span></label>
+          <label class="layer-chip"><input type="checkbox" class="layer-toggle" data-layer="base" checked />
+            <span class="lc-ico" data-icon="home"></span><span data-i18n="map.tBase">Bases</span></label>
+          <!-- Categorias criadas pelo usuário entram aqui, na mesma
+               fila das de fábrica: elas não são cidadãs de segunda. -->
+          <span id="map-layers-cats" class="layer-cats"></span>
+          <span class="map-spacer"></span>
+          <span class="map-scale muted small" id="map-scale-info"></span>
+        </div>
+
+        <div class="map-wrap">
+          <canvas id="map-canvas"></canvas>
+          <div class="map-tooltip hidden" id="map-tooltip"></div>
+          <!-- Coordenada sob o cursor + em que local ela fica. -->
+          <div class="map-coordbar hidden" id="map-coordbar"></div>
+          <div class="map-adding-hint hidden" id="map-adding-hint">
+            <span data-i18n="map.clickToPlace">Clique no mapa para colocar o marcador</span>
+            <button class="btn-small" id="btn-marker-cancel" data-i18n="common.cancel">Cancelar</button>
+          </div>
+          <div class="map-adding-hint moving hidden" id="map-moving-hint">
+            <span data-i18n="markers.moveHint">Arraste um marcador para movê-lo. Locais do jogo ficam travados.</span>
+            <button class="btn-small" id="btn-marker-move-off" data-i18n="common.done">Pronto</button>
+          </div>
+          <p class="muted map-hint" data-i18n="tracking.mapHint">
+            Arraste para mover, scroll para zoom, duplo clique reseta. Botão direito num marcador remove.
+          </p>
+        </div>
+      </section>
+      </div>
+    </div>
+    <!-- INVENTÁRIO E BASES DO SERVIDOR.
+         Quanto você tem de cada item (catálogo lido dos arquivos do
+         jogo e dos mods) e o layout das bases: andares, chão
+         (quadrado e triangular), paredes com porta/janela/garagem/
+         customizada, e os storages com a grade interna igual à do
+         jogo. Ver js/inventory.js e js/bases.js. -->
+    <div class="tk-pane hidden" id="tkpane-inventory">
+      <section class="panel panel-wide inv-panel" id="panel-inventory">
+        <div class="inv-top">
+          <div class="inv-subtabs" id="inv-subtabs">
+            <button class="inv-subtab active" data-sub="items"><span data-icon="backpack"></span> <span data-i18n="inv.tabItems">Itens</span></button>
+            <button class="inv-subtab" data-sub="bases"><span data-icon="home"></span> <span data-i18n="inv.tabBases">Bases</span></button>
+          </div>
+          <div class="inv-stats">
+            <div><b id="inv-stat-types">0</b><span data-i18n="inv.statTypes">tipos</span></div>
+            <div><b id="inv-stat-units">0</b><span data-i18n="inv.statUnits">unidades</span></div>
+            <div><b id="inv-stat-inbase">0</b><span data-i18n="inv.statInBase">nas bases</span></div>
+            <div><b id="inv-stat-bases">0</b><span data-i18n="inv.statBases">bases</span></div>
+          </div>
+          <span class="map-spacer"></span>
+          <button class="btn-small" id="inv-pdf"><span data-icon="download"></span> <span data-i18n="inv.pdfBtn">Exportar PDF</span></button>
+          <button class="btn-small" id="inv-catalog-btn"><span data-icon="gear"></span> <span data-i18n="inv.catalogBtn">Catálogo</span></button>
+          <button class="help-dot" data-help="inv.help">?</button>
+        </div>
+
+        <!-- Sem catálogo ainda: explica e lê. -->
+        <div class="inv-onboard hidden" id="inv-onboard">
+          <div class="inv-onb-ico" data-icon="backpack"></div>
+          <h3 data-i18n="inv.onbTitle">Ler os itens do Unturned</h3>
+          <p class="muted" data-i18n="inv.onbText">O inventário usa os arquivos do próprio jogo e dos mods do Workshop: nome, ID, ícone, tamanho do item e o tamanho de cada baú, safe e armário.</p>
+          <div class="inv-onb-paths">
+            <div><span data-i18n="inv.cat.game">Pasta do jogo</span><code id="inv-onb-game"></code></div>
+            <div><span data-i18n="inv.cat.workshop">Mods do Workshop</span><code id="inv-onb-workshop"></code></div>
+          </div>
+          <div class="inv-onb-actions">
+            <button class="btn" id="inv-onb-folders"><span data-icon="folder"></span> <span data-i18n="inv.onbFolders">Pastas e mods…</span></button>
+            <button class="btn btn-primary inv-scan-btn" id="inv-onb-scan"><span data-icon="refresh"></span> <span data-i18n="inv.cat.scan">Ler catálogo</span></button>
+          </div>
+          <p class="inv-scan-status muted small"></p>
+        </div>
+
+        <!-- Itens -->
+        <div class="inv-items hidden" id="inv-items">
+          <div class="inv-items-main">
+            <div class="inv-toolbar">
+              <input type="search" id="inv-search" class="inv-search" data-i18n-ph="inv.searchPh" placeholder="Buscar por nome ou ID…">
+              <select id="inv-sort" class="map-select">
+                <option value="id" data-i18n="inv.sortId">Ordenar por ID</option>
+                <option value="name" data-i18n="inv.sortName">Ordenar por nome</option>
+                <option value="qty" data-i18n="inv.sortQty">Mais tenho primeiro</option>
+                <option value="rarity" data-i18n="inv.sortRarity">Raridade</option>
+              </select>
+              <select id="inv-map" class="map-select"></select>
+              <label class="inv-check"><input type="checkbox" id="inv-mine"> <span data-i18n="inv.onlyMine">Só o que tenho</span></label>
+              <span class="muted small" id="inv-count"></span>
+            </div>
+            <div class="inv-chips" id="inv-chips"></div>
+            <div class="inv-scroll" id="inv-scroll">
+              <div class="inv-grid" id="inv-grid"></div>
+              <p class="muted inv-empty hidden" id="inv-empty" data-i18n="inv.emptyFilter">Nenhum item com esse filtro.</p>
+            </div>
+          </div>
+          <aside class="inv-where hidden" id="inv-where"></aside>
+        </div>
+
+        <!-- Bases -->
+        <!-- Bases: o 2D/3D ocupa a área toda; ferramentas, andares,
+             storages e o selecionado flutuam por cima (dá para
+             recolher cada um). A lista de bases é um menu suspenso. -->
+        <div class="inv-bases hidden" id="inv-bases">
+          <div class="bs-empty" id="bs-empty">
+            <div class="inv-onb-ico" data-icon="home"></div>
+            <h3 data-i18n="inv.bases.emptyTitle">Nenhuma base neste servidor</h3>
+            <p class="muted" data-i18n="inv.bases.emptyText">Desenhe o chão de cada andar, as paredes com portas e janelas, e coloque os baús, safes e armários onde eles estão. Depois abra cada um e organize os itens como no jogo.</p>
+            <button class="btn btn-primary" id="bs-empty-add"><span data-icon="plus"></span> <span data-i18n="inv.bases.new">Nova base</span></button>
+          </div>
+          <div class="bs-work hidden" id="bs-work">
+            <div class="bs-head">
+              <div class="bs-pop-wrap">
+                <button class="bs-base-btn" id="bs-bases-btn" data-i18n-title="inv.tabBases"><span data-icon="home"></span><span class="bs-base-count" id="bs-base-count"></span><span data-icon="caretDown"></span></button>
+                <div class="bs-pop bs-bases-pop hidden" id="bs-bases-pop">
+                  <div class="bs-side-head">
+                    <h3 data-i18n="inv.tabBases">Bases</h3>
+                    <button class="btn-small primary" id="bs-add"><span data-icon="plus"></span> <span data-i18n="inv.bases.new">Nova base</span></button>
+                  </div>
+                  <ul class="bs-list" id="bs-list"></ul>
+                </div>
+              </div>
+              <input type="text" id="bs-name" class="bs-name" maxlength="50">
+              <div class="bs-views">
+                <button class="bs-view active" data-view="2d">2D</button>
+                <button class="bs-view" data-view="3d">3D</button>
+              </div>
+              <button class="btn-small" id="bs-center"><span data-icon="target"></span> <span data-i18n="inv.bases.center">Centralizar</span></button>
+              <button class="btn-small" id="bs-pin"><span data-icon="pin"></span> <span data-i18n="inv.bases.pin">Ver no mapa</span></button>
+              <button class="btn-small" id="bs-full" data-i18n-title="map.fullscreen"><span data-icon="external"></span></button>
+            </div>
+
+            <div class="bs-stage" id="bs-stage">
+              <canvas id="bs-canvas"></canvas>
+              <div class="bs-3d hidden" id="bs-3d"></div>
+
+              <!-- ferramentas (topo) -->
+              <div class="bs-float bs-tools-float">
+                <div class="bs-toolbar" id="bs-tools2d">
+                  <button class="bs-tool" data-tool="select" data-i18n-title="inv.bases.tSelectTitle"><span data-icon="hand"></span> <span data-i18n="inv.bases.tSelect">Mover</span></button>
+                  <button class="bs-tool" data-tool="floor" data-i18n-title="inv.bases.tFloorTitle"><span class="bs-sq"></span> <span data-i18n="inv.bases.tFloor">Chão</span></button>
+                  <button class="bs-tool" data-tool="tri" data-i18n-title="inv.bases.tTriTitle"><span class="bs-tri"></span> <span data-i18n="inv.bases.tTri">Triângulo</span></button>
+                  <button class="bs-tool" data-tool="wall" data-i18n-title="inv.bases.tWallTitle"><span data-icon="wall"></span> <span data-i18n="inv.bases.tWall">Parede</span></button>
+                  <button class="bs-tool" data-tool="storage" data-i18n-title="inv.bases.tStorageTitle"><span data-icon="box"></span> <span data-i18n="inv.bases.tStorage">Storage</span></button>
+                  <button class="bs-tool" data-tool="object" data-i18n-title="inv.bases.tObjectTitle"><span data-icon="flag"></span> <span data-i18n="inv.bases.tObject">Objeto</span></button>
+                  <button class="bs-tool" data-tool="erase" data-i18n-title="inv.bases.tEraseTitle"><span data-icon="broom"></span> <span data-i18n="inv.bases.tErase">Apagar</span></button>
+                  <label class="bs-opt hidden" id="bs-opt-brush"><span data-i18n="inv.bases.brush">Pincel</span>
+                    <select id="bs-brush" class="map-select"><option value="1">1×1</option><option value="2">2×2</option><option value="3">3×3</option></select></label>
+                  <div class="bs-opt hidden" id="bs-opt-tri">
+                    <span data-i18n="inv.bases.triRot">Ângulo</span>
+                    <button class="btn-small" id="bs-tri-rot" data-i18n-title="inv.bases.triRotTitle"></button>
+                  </div>
+                  <div class="bs-opt bs-walltypes hidden" id="bs-opt-wall">
+                    <button class="bs-wt" data-wt="wall"><span class="wt-sw" style="background:#c9d1c3"></span><span data-i18n="inv.wall.wall">Parede</span></button>
+                    <button class="bs-wt" data-wt="door"><span class="wt-sw" style="background:#d9903f"></span><span data-i18n="inv.wall.door">Porta</span></button>
+                    <button class="bs-wt" data-wt="window"><span class="wt-sw" style="background:#6cc7e8"></span><span data-i18n="inv.wall.window">Janela</span></button>
+                    <button class="bs-wt" data-wt="garage"><span class="wt-sw" style="background:#a7b1bb"></span><span data-i18n="inv.wall.garage">Garagem</span></button>
+                    <button class="bs-wt" data-wt="custom"><span class="wt-sw"></span><span data-i18n="inv.wall.custom">Customizada</span></button>
+                    <select id="bs-custom-sel" class="map-select hidden"></select>
+                    <button class="btn-small hidden" id="bs-custom-edit" data-i18n-title="inv.walls.title"><span data-icon="edit"></span></button>
+                  </div>
+                  <!-- material do chão/parede (vida tirada do jogo) -->
+                  <div class="bs-opt bs-mats hidden" id="bs-opt-mat">
+                    <span data-i18n="inv.mat.label">Material</span>
+                    <button class="bs-mat" data-mat="pine"><span class="mat-sw" style="background:#b08a57"></span><span data-i18n="inv.mat.pine">Pinho</span></button>
+                    <button class="bs-mat" data-mat="birch"><span class="mat-sw" style="background:#cdb88f"></span><span data-i18n="inv.mat.birch">Bétula</span></button>
+                    <button class="bs-mat" data-mat="maple"><span class="mat-sw" style="background:#94643f"></span><span data-i18n="inv.mat.maple">Bordo</span></button>
+                    <button class="bs-mat" data-mat="metal"><span class="mat-sw" style="background:#8d969c"></span><span data-i18n="inv.mat.metal">Metal</span></button>
+                    <button class="bs-mat" data-mat="brick"><span class="mat-sw" style="background:#a4573f"></span><span data-i18n="inv.mat.brick">Tijolo</span></button>
+                    <small class="bs-mat-hp" id="bs-mat-hp"></small>
+                  </div>
+                  <label class="inv-check bs-areas-tg"><input type="checkbox" id="bs-areas" checked> <span data-i18n="inv.bases.areas">Áreas</span></label>
+                </div>
+                <div class="bs-toolbar hidden" id="bs-opts3d">
+                  <label class="inv-check"><input type="checkbox" id="bs-glass" checked> <span data-i18n="inv.bases.glass">Paredes transparentes</span></label>
+                  <label class="inv-check"><input type="checkbox" id="bs-only-below"> <span data-i18n="inv.bases.onlyBelow">Esconder andares acima</span></label>
+                  <label class="inv-check"><input type="checkbox" id="bs-areas3d" checked> <span data-i18n="inv.bases.areas">Áreas</span></label>
+                </div>
+              </div>
+
+              <!-- andares (esquerda) -->
+              <div class="bs-float bs-floors-float">
+                <div class="bs-floor-tabs" id="bs-floor-tabs"></div>
+                <div class="bs-floor-actions">
+                  <button class="btn-small" id="bs-floor-add" data-i18n-title="inv.bases.addFloor"><span data-icon="plus"></span> <span data-i18n="inv.bases.addFloor">Andar</span></button>
+                  <div class="bs-pop-wrap">
+                    <button class="btn-small" id="bs-floor-cfg-btn" data-i18n-title="inv.bases.floorName"><span data-icon="gear"></span></button>
+                    <div class="bs-pop bs-floor-cfg hidden" id="bs-floor-cfg">
+                      <input type="text" id="bs-floor-name" maxlength="30" data-i18n-ph="inv.bases.floorName" placeholder="Nome do andar">
+                      <div class="bs-size"><input type="number" id="bs-floor-w" min="2" max="200"><span>×</span><input type="number" id="bs-floor-h" min="2" max="200"></div>
+                      <small class="muted" data-i18n="inv.bases.sizeHint">pisos (1 piso = 6 m)</small>
+                      <div class="bs-grow">
+                        <span class="bs-grow-t" data-i18n="inv.bases.grow">Aumentar a base (todos os andares)</span>
+                        <div class="bs-grow-pad">
+                          <button class="btn-small" data-grow="up" data-i18n-title="inv.bases.growUp" title="Para cima">↑</button>
+                          <button class="btn-small" data-grow="left" data-i18n-title="inv.bases.growLeft" title="Para a esquerda">←</button>
+                          <input type="number" id="bs-grow-n" min="1" max="50" value="2" data-i18n-title="inv.bases.growN" title="Pisos">
+                          <button class="btn-small" data-grow="right" data-i18n-title="inv.bases.growRight" title="Para a direita">→</button>
+                          <button class="btn-small" data-grow="down" data-i18n-title="inv.bases.growDown" title="Para baixo">↓</button>
+                        </div>
+                      </div>
+                      <label class="inv-check small"><input type="checkbox" id="bs-floor-copy" checked> <span data-i18n="inv.bases.copyFloor">Copiar chão e paredes</span></label>
+                      <button class="btn-small danger" id="bs-floor-del"><span data-icon="trash"></span> <span data-i18n="inv.bases.delFloor">Excluir andar</span></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- storages do jogo (direita, recolhível) -->
+              <div class="bs-float bs-right" id="bs-right">
+                <button class="bs-panel-head" id="bs-right-toggle"><span data-icon="box"></span> <span data-i18n="inv.bases.place">Colocar</span><span class="bs-caret" data-icon="caretDown"></span></button>
+                <div class="bs-panel-body">
+                  <div class="bs-rtabs">
+                    <button class="bs-rtab active" data-tab="storages" data-i18n="inv.bases.tabStorages">Storages</button>
+                    <button class="bs-rtab" data-tab="objects" data-i18n="inv.bases.tabObjects">Objetos</button>
+                  </div>
+                  <input type="search" id="bs-st-search" class="inv-search" data-i18n-ph="inv.bases.stSearch" placeholder="Buscar…">
+                  <div class="bs-obj-cats hidden" id="bs-obj-cats"></div>
+                  <div class="bs-palette" id="bs-palette"></div>
+                </div>
+              </div>
+
+              <!-- selecionado (embaixo à direita; só aparece com seleção) -->
+              <div class="bs-float bs-details hidden" id="bs-details"></div>
+
+              <div class="bs-hint" id="bs-hint"></div>
+              <div class="bs-focus hidden" id="bs-focus"><span data-icon="eye"></span> <span data-i18n="inv.bases.focus">Destacando</span> <b></b> <button class="inv-x" data-icon="close"></button></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <!-- MESA DE INVESTIGAÇÃO DO SERVIDOR.
+         As mesmas anotações da aba ao lado, olhadas pela relação
+         entre elas em vez de pela data. Ver o topo de board.js. -->
+    <div class="tk-pane hidden" id="tkpane-board">
+      <div class="tracking-grid">
+        <section class="panel panel-wide" id="panel-board">
+          <h2>
+            <span data-i18n="board.title">Mesa de investigação</span>
+            <button class="help-dot" data-help="board.help">?</button>
+          </h2>
+          <div id="tk-board"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="tk-pane hidden" id="tkpane-notes">
+      <div class="tracking-grid">
+      <section class="panel panel-wide" id="panel-notes">
+        <h2>
+          <span data-i18n="notes.title">Anotações e prints</span>
+          <span class="count-badge" id="notes-count">0</span>
+          <button class="help-dot" data-help="notes.help">?</button>
+        </h2>
+        <div id="tk-notes"></div>
+      </section>
+      </div>
+    </div>
+
+    <div class="tk-pane hidden" id="tkpane-logs">
+      <div class="tracking-grid">
+      <section class="panel panel-wide" id="panel-logs">
+        <h2>
+          <span data-i18n="tracking.logs">Logs</span>
+          <div class="log-tabs">
+            <button class="log-tab active" data-tab="activity" data-i18n="log.tabActivity">Atividade do servidor</button>
+            <button class="log-tab" data-tab="live" data-i18n="log.tabLive">Log do Unturned (ao vivo)</button>
+          </div>
+        </h2>
+
+        <!-- Aba 1: eventos de join/leave detectados pelo Query Port -->
+        <div class="log-pane" id="pane-activity">
+          <div class="log-toolbar">
+            <button class="btn-ghost small" id="btn-clear-logs" data-i18n="tracking.clearLogs">Limpar</button>
+          </div>
+          <ul class="logs-list" id="logs-list"></ul>
+        </div>
+
+        <!-- Aba 2: leitura ao vivo do Client.log do Unturned -->
+        <div class="log-pane hidden" id="pane-live">
+          <div class="log-toolbar">
+            <input type="text" id="log-search" class="log-search" data-i18n-ph="log.search" placeholder="Filtrar no texto..." />
+            <label class="log-check"><input type="checkbox" id="log-autoscroll" checked /> <span data-i18n="log.autoscroll">Rolar</span></label>
+            <label class="log-check"><input type="checkbox" id="log-noise" /> <span data-i18n="log.showNoise">Mostrar tudo</span></label>
+            <span style="flex:1"></span>
+            <button class="btn-ghost small" id="log-reload" data-i18n="log.reload">Recarregar</button>
+            <button class="btn-ghost small" id="log-export" data-i18n="log.export">Exportar</button>
+            <button class="btn-ghost small" id="log-reveal" data-i18n="log.reveal">Abrir pasta</button>
+          </div>
+
+          <div class="log-filters" id="log-filters">
+            <button class="log-chip active" data-cat="connection"><span data-icon="plug"></span> <span data-i18n="log.catConnection">Conexão</span></button>
+            <button class="log-chip active" data-cat="server"><span data-icon="monitor"></span> <span data-i18n="log.catServer">Servidor</span></button>
+            <button class="log-chip active" data-cat="player"><span data-icon="user"></span> <span data-i18n="log.catPlayer">Jogadores</span></button>
+            <button class="log-chip active" data-cat="workshop"><span data-icon="puzzle"></span> <span data-i18n="log.catWorkshop">Workshop</span></button>
+            <button class="log-chip active" data-cat="level"><span data-icon="map"></span> <span data-i18n="log.catLevel">Mapa</span></button>
+            <button class="log-chip active" data-cat="session"><span data-icon="gamepad"></span> <span data-i18n="log.catSession">Sessão</span></button>
+            <button class="log-chip active" data-cat="error"><span data-icon="warning"></span> <span data-i18n="log.catError">Erros</span></button>
+            <button class="log-chip" data-cat="other"><span data-icon="file"></span> <span data-i18n="log.catOther">Outros</span></button>
+          </div>
+
+          <p class="muted small" id="log-status"></p>
+          <div class="log-stream" id="log-stream"></div>
+        </div>
+      </section>
+      </div>
+    </div>
+    <div class="tk-pane hidden" id="tkpane-history">
+      <div class="tracking-grid">
+      <section class="panel" id="panel-history">
+        <h2 data-i18n="tracking.historyTitle">Histórico de jogadores</h2>
+        <canvas id="tk-history-canvas" width="600" height="90" class="history-canvas"></canvas>
+        <p class="muted small" data-i18n="tracking.historyLocalHint">
+          Linha construída a partir das próprias consultas locais deste app (Query Port).
+        </p>
+        <p class="muted small" id="tk-bm-history-note"></p>
+      </section>
+      </div>
+    </div>
+  </main>
+
+
+
+<!-- ======================= INVENTÁRIO: MODAIS ======================= -->
+  <div class="modal-backdrop hidden" id="modal-inv-pdf">
+    <div class="modal inv-pdf-modal">
+      <h2><span data-icon="download"></span> <span data-i18n="inv.pdf.title">Exportar inventário (PDF em inglês)</span></h2>
+      <p class="muted small" data-i18n="inv.pdf.text">Cada item com ícone, quantidade e o comando para pegar no jogo.</p>
+      <label><span data-i18n="inv.pdf.player">Jogador (opcional)</span><input type="text" id="inv-pdf-player" maxlength="40"></label>
+      <label><span data-i18n="inv.pdf.fmt">Formato do comando</span>
+        <select id="inv-pdf-fmt">
+          <option value="vanilla">/give [player]/&lt;id&gt;/&lt;amount&gt; (vanilla)</option>
+          <option value="rocket">/i &lt;id&gt; &lt;amount&gt; (Rocket / uEssentials)</option>
+          <option value="rocket-give">/give &lt;player&gt; &lt;id&gt; &lt;amount&gt; (Rocket)</option>
+        </select></label>
+      <div class="inv-pdf-row">
+        <label><span data-i18n="inv.pdf.sort">Ordem</span>
+          <select id="inv-pdf-sort"><option value="id">ID</option><option value="name" data-i18n="inv.pdf.sortName">Nome</option><option value="qty" data-i18n="inv.pdf.sortQty">Quantidade</option></select></label>
+        <label><span data-i18n="inv.pdf.scope">Itens</span>
+          <select id="inv-pdf-scope"><option value="all" data-i18n="inv.pdf.scopeAll">Tudo que tenho</option><option value="view" data-i18n="inv.pdf.scopeView">Só o filtro atual</option></select></label>
+      </div>
+      <label class="check"><input type="checkbox" id="inv-pdf-group"> <span data-i18n="inv.pdf.group">Agrupar por categoria</span></label>
+      <label class="check"><input type="checkbox" id="inv-pdf-loc"> <span data-i18n="inv.pdf.loc">Incluir onde cada item está guardado</span></label>
+      <div class="modal-actions">
+        <button class="btn" id="inv-pdf-cancel" data-i18n="common.cancel">Cancelar</button>
+        <button class="btn btn-primary" id="inv-pdf-go" data-i18n="inv.pdf.go">Gerar PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="modal-inv-catalog">
+    <div class="modal inv-cat-modal">
+      <h2><span data-icon="gear"></span> <span data-i18n="inv.cat.title">Catálogo de itens</span></h2>
+      <div id="inv-cat-body"></div>
+      <div class="modal-actions"><button class="btn" id="inv-cat-close" data-i18n="common.close">Fechar</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="modal-inv-walls">
+    <div class="modal inv-walls-modal">
+      <h2><span data-icon="wall"></span> <span data-i18n="inv.walls.title">Paredes customizadas</span></h2>
+      <p class="muted small" data-i18n="inv.walls.text">Para portas e portões de mod que ocupam mais de um vão de parede. Cada uma vale para esta base.</p>
+      <div class="cw-list" id="cw-list"></div>
+      <div class="cw-new">
+        <input type="text" id="cw-name" maxlength="30" data-i18n-ph="inv.walls.namePh" placeholder="Ex.: Portão duplo">
+        <label class="cw-span"><span data-i18n="inv.walls.span">Vãos</span><input type="number" id="cw-span" min="1" max="6" value="2"></label>
+        <input type="color" id="cw-color" value="#e05c9a">
+        <button class="btn-small primary" id="cw-add"><span data-icon="plus"></span> <span data-i18n="inv.walls.add">Criar</span></button>
+      </div>
+      <div class="modal-actions"><button class="btn" id="cw-close" data-i18n="common.close">Fechar</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="modal-inv-storage">
+    <div class="modal sm-modal">
+      <div class="sm-head">
+        <div><h2 id="sm-title"></h2><small class="muted" id="sm-path"></small></div>
+        <div class="sm-usage"><span id="sm-usage"></span><div class="sm-usage-track"><div id="sm-usage-bar"></div></div></div>
+      </div>
+      <div class="sm-body">
+        <div class="sm-left">
+          <input type="search" id="sm-search" class="inv-search" data-i18n-ph="inv.sm.searchPh" placeholder="Item para guardar (nome ou ID)…">
+          <div class="sm-picker" id="sm-picker"></div>
+        </div>
+        <div class="sm-center"><div class="sm-grid-wrap"><div class="sm-grid" id="sm-grid"></div></div></div>
+        <div class="sm-right" id="sm-sel"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="sm-sort"><span data-icon="refresh"></span> <span data-i18n="inv.sm.sort">Organizar</span></button>
+        <button class="btn" id="sm-clear"><span data-icon="broom"></span> <span data-i18n="inv.sm.clear">Esvaziar</span></button>
+        <span class="map-spacer"></span>
+        <button class="btn btn-primary" id="sm-close" data-i18n="common.done">Pronto</button>
+      </div>
+    </div>
+  </div>
+
+<!-- ======================= MODAL: QUICK VIEW ======================= -->
+  <!-- Shift + clique em qualquer card. Mostra o essencial sem sair da home. -->
+  <div class="modal-backdrop hidden" id="modal-quickview">
+    <div class="modal quickview">
+      <button class="qv-close" id="qv-close" aria-label="Fechar" data-icon="close"></button>
+
+      <div class="qv-head">
+        <div class="qv-icon" id="qv-icon" data-icon="gamepad"></div>
+        <div class="qv-headtext">
+          <div class="qv-name" id="qv-name"></div>
+          <div class="qv-sub">
+            <span class="qv-flag" id="qv-flag"></span>
+            <span class="copy-ip" id="qv-ip" data-i18n-title="card.copyIp" title="Clique para copiar"></span>
+          </div>
+        </div>
+        <span class="status-pill qv-status" id="qv-status"></span>
+      </div>
+
+      <div class="qv-stats">
+        <div class="qv-stat">
+          <span class="qv-stat-value" id="qv-players"></span>
+          <span class="qv-stat-label" data-i18n="quick.players">Jogadores online</span>
+        </div>
+        <div class="qv-stat">
+          <span class="qv-stat-value" id="qv-map"></span>
+          <span class="qv-stat-label" data-i18n="tracking.map">Mapa</span>
+        </div>
+        <div class="qv-stat">
+          <span class="qv-stat-value" id="qv-mods"></span>
+          <span class="qv-stat-label" data-i18n="details.mods">Mods</span>
+        </div>
+      </div>
+
+      <div class="qv-section">
+        <h3 data-i18n="details.description">Descrição</h3>
+        <div class="urt-block qv-desc" id="qv-desc"></div>
+      </div>
+
+      <div class="qv-chips" id="qv-chips"></div>
+
+      <div class="modal-actions qv-actions">
+        <button class="btn" id="qv-track" data-i18n="quick.track">Abrir tracking</button>
+        <button class="btn" id="qv-fav" data-i18n="quick.favorite"><span data-icon="star"></span> Favoritar</button>
+        <span style="flex:1"></span>
+        <button class="btn btn-primary" id="qv-join" data-i18n="tracking.join">Entrar no servidor</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: ADICIONAR SERVIDOR ======================= -->
+  <div class="modal-backdrop hidden" id="modal-add">
+    <div class="modal">
+      <h2 data-i18n="add.title">Adicionar servidor</h2>
+
+      <!-- Sugestões lidas do log do Unturned -->
+      <div class="suggest-box hidden" id="add-suggestions">
+        <div class="suggest-head">
+          <span data-i18n="add.fromLog">Detectado no log do jogo</span>
+          <button class="btn-ghost small" id="add-suggest-refresh" data-i18n="add.refreshLog">Atualizar</button>
+        </div>
+        <div class="suggest-list" id="add-suggest-list"></div>
+      </div>
+
+      <label>
+        <span data-i18n="add.address">IP:porta ou ID do BattleMetrics</span>
+        <input type="text" data-i18n-ph="ph.addInput" id="add-input" placeholder="23.27.211.226:27017 ou 31635372" />
+      </label>
+      <label>
+        <span data-i18n="add.queryPort">Query Port (opcional — padrão: porta + 1)</span>
+        <input type="number" data-i18n-ph="ph.queryPort" id="add-queryport" placeholder="Ex: 27016" />
+      </label>
+      <label>
+        <span data-i18n="add.tags">Tags (separadas por vírgula)</span>
+        <input type="text" data-i18n-ph="ph.tags" id="add-tags" placeholder="pvp, brasil, vanilla" />
+      </label>
+      <label>
+        <span data-i18n="add.folder">Pasta</span>
+        <select id="add-folder"><option value="" data-i18n="folder.none">Sem pasta</option></select>
+      </label>
+      <label class="check">
+        <input type="checkbox" id="add-favorite" />
+        <span data-i18n="add.favorite">Marcar como favorito</span>
+      </label>
+      <p class="modal-error hidden" id="add-error"></p>
+      <div class="modal-actions">
+        <button class="btn" id="add-cancel" data-i18n="common.cancel">Cancelar</button>
+        <button class="btn btn-primary" id="add-confirm" data-i18n="common.add">Adicionar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: PASTA ======================= -->
+  <div class="modal-backdrop hidden" id="modal-folder">
+    <div class="modal">
+      <h2 id="folder-modal-title" data-i18n="folder.new">Nova pasta</h2>
+      <p class="muted small" data-i18n="folder.help">
+        Agrupe os servidores de uma mesma rede. A cor vira o contorno da pasta e o ícone pode ser a logo da rede.
+      </p>
+      <label>
+        <span data-i18n="folder.name">Nome</span>
+        <input type="text" data-i18n-ph="ph.folderName" id="folder-name" maxlength="40" placeholder="Ex: Rede CanadEste" />
+      </label>
+      <div class="field">
+        <span class="field-label" data-i18n="folder.color">Cor do contorno</span>
+        <div class="color-row" id="folder-colors"></div>
+      </div>
+      <label>
+        <span data-i18n="folder.icon">Ícone (URL de imagem)</span>
+        <input type="text" data-i18n-ph="ph.folderIcon" id="folder-icon" placeholder="https://.../logo.png" />
+      </label>
+      <div class="field">
+        <span class="field-label" data-i18n="folder.iconPick">Ou use o ícone de um servidor já adicionado</span>
+        <div class="icon-picker" id="folder-icon-picker"></div>
+      </div>
+      <div class="folder-preview" id="folder-preview"></div>
+      <p class="modal-error hidden" id="folder-error"></p>
+      <div class="modal-actions">
+        <button class="btn" id="folder-cancel" data-i18n="common.cancel">Cancelar</button>
+        <button class="btn btn-primary" id="folder-confirm" data-i18n="common.save">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: MARCADORES EM MASSA ======================= -->
+  <div class="modal-backdrop hidden" id="modal-markers">
+    <div class="modal markers-modal">
+      <h2><span data-i18n="markers.title">Marcadores</span> — <span id="mk-map"></span></h2>
+
+      <div class="mk-tools">
+        <input type="text" id="mk-search" class="list-search"
+               data-i18n-ph="markers.search" placeholder="Buscar marcador pelo nome..." />
+        <select id="mk-type-filter">
+          <option value="all" data-i18n="markers.allTypes">Todos os tipos</option>
+          <option value="location" data-i18n="map.tLocation">Locais</option>
+          <option value="airdrop" data-i18n="map.tAirdrop">Airdrops</option>
+          <option value="item" data-i18n="map.tItem">Itens</option>
+          <option value="custom" data-i18n="map.tCustom">Custom</option>
+        </select>
+        <select id="mk-source-filter">
+          <option value="all" data-i18n="markers.allSources">Todas as origens</option>
+          <option value="auto" data-i18n="markers.onlyAuto">Só extraídos do jogo</option>
+          <option value="manual" data-i18n="markers.onlyManual">Só criados por mim</option>
+        </select>
+      </div>
+
+      <div class="mk-bar">
+        <label class="check"><input type="checkbox" id="mk-all" />
+          <span data-i18n="markers.selectAll">Selecionar tudo</span></label>
+        <span class="muted small" id="mk-selected"></span>
+        <span style="flex:1"></span>
+        <span class="muted small" id="mk-count"></span>
+      </div>
+
+      <div class="mk-list" id="mk-rows"></div>
+
+      <div class="mk-actions">
+        <select id="mk-retype-to">
+          <option value="location" data-i18n="map.tLocation">Locais</option>
+          <option value="airdrop" data-i18n="map.tAirdrop">Airdrops</option>
+          <option value="item" data-i18n="map.tItem">Itens</option>
+          <option value="custom" data-i18n="map.tCustom">Custom</option>
+        </select>
+        <button class="btn-small" id="mk-retype" data-i18n="markers.retype">Trocar o tipo</button>
+        <button class="btn-small danger" id="mk-delete" data-i18n="markers.delete">Excluir selecionados</button>
+        <span style="flex:1"></span>
+        <button class="btn-small" id="mk-extract" data-i18n="map.extractNodes"><span data-icon="tag"></span> Extrair do jogo</button>
+        <button class="btn-small" id="mk-clear-auto" data-i18n="markers.clearAuto">Limpar extraídos</button>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" id="mk-close" data-i18n="common.close">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: MOVER PARA PASTA ======================= -->
+  <div class="modal-backdrop hidden" id="modal-move">
+    <div class="modal">
+      <h2 data-i18n="folder.moveTitle">Mover para pasta</h2>
+      <p class="muted small" id="move-text"></p>
+      <div class="move-list" id="move-list"></div>
+      <div class="modal-actions">
+        <button class="btn" id="move-cancel" data-i18n="common.cancel">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: CONFIRMAR EXCLUSÃO ======================= -->
+  <div class="modal-backdrop hidden" id="modal-delete">
+    <div class="modal">
+      <h2 data-i18n="delete.title">Excluir servidores</h2>
+      <p id="delete-text"></p>
+      <!-- Anotações e prints são trabalho seu; apagar junto tem de
+           ser uma escolha, não um efeito colateral. -->
+      <label class="check hidden" id="delete-notes-row">
+        <input type="checkbox" id="delete-notes" />
+        <span id="delete-notes-label"></span>
+        <button class="help-dot" data-help="delete.notesHelp">?</button>
+      </label>
+      <div class="modal-actions">
+        <button class="btn" id="delete-cancel" data-i18n="common.cancel">Cancelar</button>
+        <button class="btn btn-danger" id="delete-confirm" data-i18n="common.delete">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: SERVIDOR ATUAL (MANUAL) ======================= -->
+  <div class="modal-backdrop hidden" id="modal-current">
+    <div class="modal">
+      <h2 data-i18n="current.manualTitle">Onde você está jogando?</h2>
+      <p class="muted" data-i18n="current.manualHelp">Informe o IP:porta do servidor, ou aponte o arquivo de log do Unturned para detecção automática.</p>
+      <label>
+        <span data-i18n="current.address">IP:porta do servidor</span>
+        <input type="text" data-i18n-ph="ph.ip" id="cur-ip" placeholder="23.27.211.226:27015" />
+      </label>
+      <p class="muted small" id="cur-logpath"></p>
+      <div class="modal-actions">
+        <button class="btn" id="cur-pick-log" data-i18n="current.pickLog">Apontar log do Unturned</button>
+        <span style="flex:1"></span>
+        <button class="btn" id="cur-cancel" data-i18n="common.cancel">Cancelar</button>
+        <button class="btn btn-primary" id="cur-confirm" data-i18n="common.confirm">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: CONFIGURAÇÕES ======================= -->
+  <div class="modal-backdrop hidden" id="modal-settings">
+    <div class="modal settings-modal">
+      <h2 data-i18n="settings.title">Configurações</h2>
+
+      <div class="settings-tabs" id="settings-tabs">
+        <button class="settings-tab active" data-tab="general" data-i18n="settings.tabGeneral">Geral</button>
+        <button class="settings-tab" data-tab="steam" data-i18n="settings.tabSteam">Conta Steam</button>
+        <button class="settings-tab" data-tab="overlay" data-i18n="settings.tabOverlay">Overlay</button>
+        <button class="settings-tab" data-tab="hotkeys" data-i18n="settings.tabHotkeys">Atalhos</button>
+        <button class="settings-tab" data-tab="data" data-i18n="settings.tabData">Dados</button>
+      </div>
+
+      <div class="settings-body">
+
+        <!-- ---------------- GERAL ---------------- -->
+        <div class="settings-pane" id="pane-general">
+          <label>
+            <span data-i18n="settings.language">Idioma</span>
+            <select id="cfg-language">
+              <option value="pt-BR">Português (Brasil)</option>
+              <option value="en-US">English (US)</option>
+            </select>
+          </label>
+          <!-- Pasta do jogo.
+               Isto não é conforto: sem ela o app não acha o log do
+               Unturned, a calculadora de raid cai nos valores de
+               reserva e as horas por jogador não têm de onde sair.
+               Um campo, três funcionalidades. -->
+          <div class="field-path">
+            <span data-i18n="settings.gamePath">Pasta do Unturned</span>
+            <div class="fp-row">
+              <input type="text" id="cfg-game-path" readonly
+                     data-i18n-ph="settings.gamePathPh" placeholder="Ainda não definida" />
+              <button class="btn-small" id="cfg-game-pick" data-i18n="settings.gamePick">Escolher</button>
+              <button class="btn-small" id="cfg-game-auto" data-i18n="settings.gameAuto">Detectar</button>
+            </div>
+            <p class="fp-hint muted small" id="cfg-game-hint"></p>
+          </div>
+
+          <label>
+            <span data-i18n="settings.token">Token da API BattleMetrics</span>
+            <input type="password" data-i18n-ph="ph.token" id="cfg-token" placeholder="Cole seu token aqui" />
+          </label>
+          <label>
+            <span data-i18n="settings.refresh">Intervalo de atualização (segundos)</span>
+            <input type="number" id="cfg-refresh" min="10" max="300" step="5" />
+          </label>
+          <label class="check">
+            <input type="checkbox" id="cfg-flags" />
+            <span data-i18n="settings.flags">Mostrar a bandeira do país no card</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="cfg-watch" />
+            <span data-i18n="settings.watchLog">Detectar o servidor automaticamente pelo log do jogo</span>
+            <button class="help-dot" data-help="help.watchLog">?</button>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="cfg-help" />
+            <span data-i18n="settings.helpDots">Mostrar os botões "?" de ajuda</span>
+            <button class="help-dot" data-help="help.helpDots">?</button>
+          </label>
+
+          <!-- O que o X faz. Desligado de fábrica: um app que não
+               fecha quando você manda fechar surpreende no pior
+               momento, e ninguém procura essa opção ANTES de ser
+               surpreendido. -->
+          <label class="check">
+            <input type="checkbox" id="cfg-tray" />
+            <span data-i18n="settings.closeToTray">Ao fechar, manter o tracking rodando na bandeja</span>
+            <button class="help-dot" data-help="help.closeToTray">?</button>
+          </label>
+          <p class="muted small field-note" data-i18n="settings.closeToTrayNote">
+            Com isto ligado, o X esconde a janela e o app continua acompanhando o servidor,
+            com um ícone ao lado do relógio. Para encerrar de vez, clique com o botão direito
+            nesse ícone e escolha Sair. Desligado, o X fecha tudo.
+          </p>
+          <div class="test-row">
+            <button class="btn" id="cfg-welcome" data-i18n="welcome.replay">Rever a introdução</button>
+          </div>
+        </div>
+
+        <!-- ---------------- CONTA STEAM ---------------- -->
+        <div class="settings-pane hidden" id="pane-steam">
+          <label class="check">
+            <input type="checkbox" id="cfg-steam-enabled" />
+            <span data-i18n="settings.steamEnabled">Ativar integração com a Steam</span>
+          </label>
+          <p class="muted small" data-i18n="settings.steamHelp">
+            Sua foto e seu nome vêm do perfil público, sem precisar de nada.
+            Para ver os amigos e em qual servidor eles estão, é preciso uma chave gratuita da Steam Web API.
+          </p>
+
+          <div class="steam-card" id="steam-card">
+            <div class="steam-avatar" id="steam-avatar" data-icon="gamepad"></div>
+            <div class="steam-info">
+              <div class="steam-name" id="steam-name" data-i18n="settings.steamNotConnected">Não conectado</div>
+              <div class="steam-id" id="steam-id"></div>
+            </div>
+          </div>
+
+          <label class="check">
+            <input type="checkbox" id="cfg-steam-auto" />
+            <span data-i18n="settings.steamAuto">Detectar meu SteamID automaticamente pela instalação da Steam</span>
+          </label>
+          <label>
+            <span data-i18n="settings.steamId">SteamID64 (deixe vazio para usar o detectado)</span>
+            <input type="text" data-i18n-ph="ph.steamId" id="cfg-steam-id" placeholder="76561198000000000" />
+          </label>
+          <label>
+            <span data-i18n="settings.steamKey">Chave da Steam Web API (opcional — só para amigos)</span>
+            <input type="password" data-i18n-ph="ph.steamKey" id="cfg-steam-key" placeholder="0123456789ABCDEF..." />
+          </label>
+          <button class="btn-ghost small" id="cfg-steam-key-link" data-i18n="settings.steamKeyLink">
+            Pegar minha chave gratuita na Steam
+          </button>
+
+          <label class="check">
+            <input type="checkbox" id="cfg-steam-friends-cards" />
+            <span data-i18n="settings.steamFriendsCards">Mostrar a foto dos amigos no card do servidor</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="cfg-steam-friend-servers" />
+            <span data-i18n="settings.steamFriendServers">Mostrar uma seção com os servidores onde meus amigos estão</span>
+          </label>
+
+          <div class="test-row">
+            <button class="btn" id="cfg-steam-test" data-i18n="settings.testSteam">Testar conexão</button>
+          </div>
+          <div class="test-result hidden" id="steam-test-result"></div>
+        </div>
+
+        <!-- ---------------- OVERLAY ---------------- -->
+        <div class="settings-pane hidden" id="pane-overlay">
+          <div class="field-grid">
+            <label>
+              <span data-i18n="settings.ovWidth">Largura (px)</span>
+              <input type="number" id="cfg-ov-width" min="260" max="900" step="10" />
+            </label>
+            <label>
+              <span data-i18n="settings.ovHeight">Altura (px)</span>
+              <input type="number" id="cfg-ov-height" min="260" max="1400" step="10" />
+            </label>
+          </div>
+
+          <label>
+            <span><span data-i18n="settings.ovOpacity">Transparência do fundo</span>
+              <b class="range-value" id="cfg-ov-opacity-value">84%</b></span>
+            <input type="range" id="cfg-ov-opacity" min="20" max="100" step="1" />
+          </label>
+          <label>
+            <span><span data-i18n="settings.ovScale">Tamanho do texto</span>
+              <b class="range-value" id="cfg-ov-scale-value">100%</b></span>
+            <input type="range" id="cfg-ov-scale" min="70" max="160" step="5" />
+          </label>
+
+          <div class="field">
+            <span class="field-label" data-i18n="settings.ovAccent">Cor de destaque</span>
+            <div class="color-row" id="cfg-ov-accent-row"></div>
+            <input type="text" data-i18n-ph="ph.accent" id="cfg-ov-accent" class="accent-input" placeholder="#6ee06e" />
+          </div>
+
+          <label class="check">
+            <input type="checkbox" id="cfg-ov-ontop" />
+            <span data-i18n="settings.ovOnTop">Manter sempre acima das outras janelas</span>
+          </label>
+
+          <div class="field">
+            <span class="field-label" data-i18n="settings.ovSections">Blocos visíveis no HUD</span>
+            <div class="check-grid">
+              <label class="check"><input type="checkbox" id="cfg-ov-sec-description" /><span data-i18n="details.description">Descrição</span></label>
+              <label class="check"><input type="checkbox" id="cfg-ov-sec-stats" /><span data-i18n="settings.ovSecStats">Números principais</span></label>
+              <label class="check"><input type="checkbox" id="cfg-ov-sec-airdrop" /><span data-i18n="airdrop.title">Airdrop</span></label>
+              <label class="check"><input type="checkbox" id="cfg-ov-sec-events" /><span data-i18n="overlay.events">Eventos recentes</span></label>
+              <label class="check"><input type="checkbox" id="cfg-ov-sec-online" /><span data-i18n="tracking.playersOnline">Jogadores online</span></label>
+            </div>
+          </div>
+
+          <h3 class="settings-sub" data-i18n="settings.notifyTitle">Notificações de jogador</h3>
+          <label class="check">
+            <input type="checkbox" id="cfg-nt-enabled" />
+            <span data-i18n="settings.notifyEnabled">Avisar quando alguém entrar ou sair</span>
+          </label>
+          <p class="muted small" data-i18n="settings.notifyScope">
+            Vale para o servidor fixado no overlay — ou, se não houver nenhum, para o servidor em que você está jogando.
+          </p>
+          <div class="check-grid">
+            <label class="check"><input type="checkbox" id="cfg-nt-join" /><span data-i18n="settings.notifyJoin">Entrada</span></label>
+            <label class="check"><input type="checkbox" id="cfg-nt-leave" /><span data-i18n="settings.notifyLeave">Saída</span></label>
+            <label class="check"><input type="checkbox" id="cfg-nt-friends" /><span data-i18n="settings.notifyOnlyFriends">Só amigos da Steam</span></label>
+          </div>
+
+          <div class="field-grid">
+            <label>
+              <span data-i18n="settings.notifyMode">Tipo do aviso</span>
+              <select id="cfg-nt-mode">
+                <option value="both" data-i18n="settings.notifyBoth">Visual e sonoro</option>
+                <option value="visual" data-i18n="settings.notifyVisual">Só visual</option>
+                <option value="sound" data-i18n="settings.notifySound">Só sonoro</option>
+              </select>
+            </label>
+            <label>
+              <span data-i18n="settings.notifySoundName">Som</span>
+              <select id="cfg-nt-sound">
+                <option value="blip" data-i18n="settings.soundBlip">Blip (curto)</option>
+                <option value="soft" data-i18n="settings.soundSoft">Suave</option>
+                <option value="alert" data-i18n="settings.soundAlert">Alerta</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            <span><span data-i18n="settings.notifyVolume">Volume</span>
+              <b class="range-value" id="cfg-nt-volume-value">60%</b></span>
+            <input type="range" id="cfg-nt-volume" min="0" max="100" step="5" />
+          </label>
+
+          <div class="field-grid">
+            <label>
+              <span data-i18n="settings.notifyPosition">Posição na tela</span>
+              <select id="cfg-nt-position">
+                <option value="top-left" data-i18n="settings.posTopLeft">Superior esquerdo</option>
+                <option value="top-center" data-i18n="settings.posTopCenter">Superior centro</option>
+                <option value="top-right" data-i18n="settings.posTopRight">Superior direito</option>
+                <option value="bottom-left" data-i18n="settings.posBottomLeft">Inferior esquerdo</option>
+                <option value="bottom-right" data-i18n="settings.posBottomRight">Inferior direito</option>
+              </select>
+            </label>
+            <label>
+              <span data-i18n="settings.notifyDuration">Duração (segundos)</span>
+              <input type="number" id="cfg-nt-duration" min="1" max="20" step="1" />
+            </label>
+          </div>
+
+          <div class="test-row">
+            <button class="btn" id="cfg-ov-preview" data-i18n="settings.testOverlay">Abrir o overlay para ver</button>
+            <button class="btn" id="cfg-nt-test" data-i18n="settings.testNotify">Testar notificação</button>
+          </div>
+        </div>
+
+        <!-- ---------------- ATALHOS ---------------- -->
+        <div class="settings-pane hidden" id="pane-hotkeys">
+          <p class="muted small" data-i18n="settings.hotkeysHelp">
+            Clique em "Definir" e pressione a combinação desejada. Os atalhos funcionam com o jogo em primeiro plano.
+          </p>
+          <div class="hotkey-list" id="hotkey-list">
+            <div class="hotkey-row" data-action="toggleOverlay">
+              <span class="hotkey-name" data-i18n="settings.hkToggleOverlay">Mostrar/ocultar overlay</span>
+              <kbd class="hotkey-value" id="hk-toggleOverlay">F8</kbd>
+              <button class="btn-ghost small hotkey-set" data-i18n="settings.hkSet">Definir</button>
+              <button class="btn-ghost small hotkey-clear" data-i18n="settings.hkClear">Limpar</button>
+            </div>
+            <div class="hotkey-row" data-action="ghostMode">
+              <span class="hotkey-name" data-i18n="settings.hkGhost">Modo fantasma (cliques atravessam)</span>
+              <kbd class="hotkey-value" id="hk-ghostMode">F9</kbd>
+              <button class="btn-ghost small hotkey-set" data-i18n="settings.hkSet">Definir</button>
+              <button class="btn-ghost small hotkey-clear" data-i18n="settings.hkClear">Limpar</button>
+            </div>
+            <div class="hotkey-row" data-action="markAirdrop">
+              <span class="hotkey-name" data-i18n="settings.hkAirdrop">Marcar que caiu um airdrop</span>
+              <kbd class="hotkey-value" id="hk-markAirdrop">F10</kbd>
+              <button class="btn-ghost small hotkey-set" data-i18n="settings.hkSet">Definir</button>
+              <button class="btn-ghost small hotkey-clear" data-i18n="settings.hkClear">Limpar</button>
+            </div>
+          </div>
+          <p class="modal-error hidden" id="hotkey-error"></p>
+          <div class="test-row">
+            <button class="btn" id="cfg-hk-apply" data-i18n="settings.hkApply">Aplicar atalhos agora</button>
+          </div>
+          <div class="test-result hidden" id="hotkey-result"></div>
+        </div>
+
+        <!-- ---------------- DADOS: backup, limpeza e reset ---------------- -->
+        <div class="settings-pane hidden" id="pane-data">
+          <h3 data-i18n="backup.section">Backup</h3>
+          <p class="muted small" data-i18n="backup.sectionHelp">
+            Um arquivo .json com o que você escolher. Serve para trocar de PC, para não perder nada
+            numa reinstalação, ou para mandar a sua lista de servidores para um amigo.
+          </p>
+          <div class="test-row">
+            <button class="btn" id="cfg-backup-export" data-i18n="backup.export">Exportar backup</button>
+            <button class="btn" id="cfg-backup-import" data-i18n="backup.import">Carregar backup</button>
+            <button class="help-dot" data-help="help.backup">?</button>
+          </div>
+          <div class="test-result hidden" id="backup-result"></div>
+
+          <h3 data-i18n="data.section">Espaço em disco</h3>
+          <div class="data-stats" id="data-stats"></div>
+          <div class="test-row">
+            <button class="btn-small" id="cfg-open-userdata" data-i18n="data.openFolder">Abrir a pasta de dados</button>
+            <button class="btn-small" id="cfg-prune-shots" data-i18n="data.pruneShots">Limpar prints órfãos</button>
+            <button class="help-dot" data-help="help.pruneShots">?</button>
+          </div>
+
+          <h3 class="danger-title" data-i18n="reset.section">Zona de perigo</h3>
+          <p class="muted small" data-i18n="reset.sectionHelp">
+            Volta o aplicativo ao estado de recém-instalado. Não tem como desfazer.
+          </p>
+          <div class="test-row">
+            <button class="btn danger" id="cfg-reset" data-i18n="reset.title">Resetar o aplicativo</button>
+          </div>
+
+          <p class="muted small app-about" id="app-about"></p>
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" id="cfg-cancel" data-i18n="common.cancel">Cancelar</button>
+        <button class="btn btn-primary" id="cfg-save" data-i18n="common.save">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: CAPTURA DE ATALHO ======================= -->
+  <div class="modal-backdrop hidden" id="modal-hotkey">
+    <div class="modal hotkey-modal">
+      <h2 data-i18n="settings.hkCapture">Pressione a combinação</h2>
+      <p class="muted" id="hotkey-capture-for"></p>
+      <div class="hotkey-preview" id="hotkey-preview">…</div>
+      <p class="muted small" data-i18n="settings.hkCaptureHelp">
+        Use teclas de função (F1–F12) ou combinações com Ctrl, Alt e Shift. Esc cancela.
+      </p>
+      <p class="modal-error hidden" id="hotkey-capture-error"></p>
+      <div class="modal-actions">
+        <button class="btn" id="hotkey-capture-cancel" data-i18n="common.cancel">Cancelar</button>
+        <button class="btn btn-primary" id="hotkey-capture-ok" data-i18n="common.save">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: NOTÍCIAS ======================= -->
+  <div class="modal-backdrop hidden" id="modal-news">
+    <div class="modal">
+      <h2 data-i18n="news.title">Notícias</h2>
+      <div class="news-list" id="news-list"></div>
+      <div class="modal-actions">
+        <button class="btn" id="news-close" data-i18n="common.close">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================= MODAL: CONTA ======================= -->
+  <!-- Entrar / criar conta no servidor do Unturned+. É o que liga o
+       time, o chat e a presença entre máquinas. -->
+  <div class="modal-backdrop hidden" id="modal-conta">
+    <div class="modal conta-modal">
+      <h2 id="conta-titulo" data-i18n="conta.signIn">Entrar na sua conta</h2>
+
+      <p class="conta-sub" id="conta-sub" data-i18n="conta.subSignIn">
+        A conta liga o seu time, o chat e a presença entre computadores.
+        Jogar sozinha não precisa de conta nenhuma.
+      </p>
+
+      <div class="conta-server">
+        <span class="cs-dot" id="conta-dot"></span>
+        <span class="muted small" id="conta-server-txt">api.cdev.com.br</span>
+        <button class="btn-small" id="conta-trocar-srv" data-i18n="conta.changeServer">Trocar</button>
+      </div>
+
+      <label class="hidden" id="conta-row-email">
+        <span data-i18n="conta.email">E-mail</span>
+        <input type="email" id="conta-email" autocomplete="email" />
+      </label>
+
+      <label>
+        <span id="conta-lbl-id" data-i18n="conta.identifier">E-mail ou nome de usuário</span>
+        <input type="text" id="conta-id" autocomplete="username" />
+      </label>
+
+      <label>
+        <span data-i18n="conta.password">Senha</span>
+        <input type="password" id="conta-pass" autocomplete="current-password" />
+      </label>
+
+      <!-- Recuperação: código de 9 dígitos. Só aparece no modo
+           "entrar" — no cadastro a pessoa ainda não tem código. -->
+      <label class="hidden" id="conta-row-code">
+        <span data-i18n="conta.recCode">Código de recuperação</span>
+        <input type="text" id="conta-code" inputmode="numeric" maxlength="11"
+               placeholder="000-000-000" autocomplete="one-time-code" />
+      </label>
+      <label class="hidden" id="conta-row-newpass">
+        <span data-i18n="conta.newPassword">Senha nova</span>
+        <input type="password" id="conta-newpass" autocomplete="new-password" />
+      </label>
+
+      <p class="form-error hidden" id="conta-erro"></p>
+
+      <button class="linkish" id="conta-esqueci" data-i18n="conta.forgot">Esqueci minha senha</button>
+
+      <div class="modal-actions">
+        <button class="btn" id="conta-alternar" data-i18n="conta.createInstead">Criar uma conta</button>
+        <span style="flex:1"></span>
+        <button class="btn" id="conta-cancelar" data-x-alias data-i18n="common.cancel">Cancelar</button>
+        <button class="btn primary" id="conta-enviar" data-i18n="conta.signIn">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: CÓDIGO DE RECUPERAÇÃO =======================
+       Aparece UMA vez: no cadastro e a cada reemissão. Depois disso
+       o servidor só tem o hash — nem ele consegue mostrar de novo.
+       Por isso a tela é chata de propósito: o botão de fechar só
+       libera depois da confirmação de que foi anotado. -->
+  <div class="modal-backdrop hidden" id="modal-codigo">
+    <div class="modal codigo-modal">
+      <h2 data-i18n="rec.title">Guarde este código</h2>
+      <p class="conta-sub" data-i18n="rec.sub">
+        É a única forma de voltar para a sua conta se esquecer a senha.
+        Ele aparece agora e não aparece de novo.
+      </p>
+
+      <div class="codigo-box">
+        <code id="codigo-valor">000-000-000</code>
+        <button class="btn-small" id="codigo-copiar" data-i18n="common.copy">Copiar</button>
+      </div>
+
+      <p class="muted small" data-i18n="rec.where">
+        Guarde onde você não perde: um papel na gaveta, o gerenciador de senhas,
+        uma nota no celular. Não vale só na cabeça.
+      </p>
+
+      <label class="check">
+        <input type="checkbox" id="codigo-confirmo" />
+        <span data-i18n="rec.confirm">Anotei o código em um lugar seguro</span>
+      </label>
+
+      <div class="modal-actions">
+        <button class="btn primary" id="codigo-fechar" disabled data-i18n="common.done">Pronto</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: AGENDA ======================= -->
+  <!-- Wipes e eventos. Uma lista só, de todos os servidores, em
+       ordem de quem chega primeiro — porque a pergunta real é "o que
+       vem agora?", não "o que tem no servidor X". O filtro atende
+       quem quer olhar um servidor específico. -->
+  <div class="modal-backdrop hidden" id="modal-agenda">
+    <div class="modal agenda-modal">
+      <h2>
+        <span data-i18n="sched.title">Agenda</span>
+        <button class="help-dot" data-help="sched.help">?</button>
+      </h2>
+
+      <div class="ag-bar">
+        <select id="ag-filter">
+          <option value="" data-i18n="sched.allServers">Todos os servidores</option>
+        </select>
+        <span style="flex:1"></span>
+        <button class="btn small primary" id="ag-new">
+          <span data-icon="plus"></span> <span data-i18n="sched.new">Novo</span>
+        </button>
+      </div>
+
+      <div class="ag-list" id="ag-list"></div>
+
+      <div class="modal-actions">
+        <button class="btn" id="ag-close" data-i18n="common.close">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: EVENTO / WIPE ======================= -->
+  <div class="modal-backdrop hidden" id="modal-event">
+    <div class="modal event-modal">
+      <h2 id="ev-title" data-i18n="sched.newTitle">Novo evento</h2>
+
+      <!-- Wipe ou evento: muda o ícone, a cor e o destaque no card
+           da home. É a primeira escolha porque muda o resto. -->
+      <div class="ev-kind" id="ev-kind">
+        <label class="ev-kind-opt">
+          <input type="radio" name="ev-kind" value="wipe" checked />
+          <span class="evk-ico" data-icon="broom"></span>
+          <span class="evk-txt">
+            <strong data-i18n="sched.kindWipe">Wipe</strong>
+            <em data-i18n="sched.kindWipeSub">Reset do servidor</em>
+          </span>
+        </label>
+        <label class="ev-kind-opt">
+          <input type="radio" name="ev-kind" value="event" />
+          <span class="evk-ico" data-icon="calendar"></span>
+          <span class="evk-txt">
+            <strong data-i18n="sched.kindEvent">Evento</strong>
+            <em data-i18n="sched.kindEventSub">Raid, airdrop, reunião…</em>
+          </span>
+        </label>
+      </div>
+
+      <label>
+        <span data-i18n="sched.server">Servidor</span>
+        <select id="ev-server"></select>
+      </label>
+
+      <label>
+        <span data-i18n="sched.evTitle">Nome</span>
+        <input type="text" id="ev-name" maxlength="60"
+               data-i18n-ph="sched.titlePh" placeholder="Wipe quinzenal" />
+      </label>
+
+      <div class="ev-when">
+        <label>
+          <span data-i18n="sched.date">Data</span>
+          <input type="date" id="ev-date" />
+        </label>
+        <label>
+          <span data-i18n="sched.time">Hora</span>
+          <input type="time" id="ev-time" value="20:00" />
+        </label>
+        <label>
+          <span data-i18n="sched.duration">Duração (min)</span>
+          <input type="number" id="ev-dur" min="0" max="10080" step="15" value="0" />
+        </label>
+      </div>
+
+      <label>
+        <span data-i18n="sched.repeat">Repetir</span>
+        <select id="ev-repeat">
+          <option value="" data-i18n="sched.repNone">Não repete</option>
+          <option value="interval" data-i18n="sched.repInterval">A cada N dias (ciclo)</option>
+          <option value="weekly" data-i18n="sched.repWeekly">Toda semana</option>
+          <option value="monthly" data-i18n="sched.repMonthly">Todo mês</option>
+        </select>
+      </label>
+
+      <div class="ev-rep-extra hidden" id="ev-every-row">
+        <label>
+          <span id="ev-every-label" data-i18n="sched.everyDays">A cada quantos dias</span>
+          <input type="number" id="ev-every" min="1" max="365" value="14" />
+        </label>
+      </div>
+
+      <div class="ev-rep-extra hidden" id="ev-week-row">
+        <span class="ev-lbl" data-i18n="sched.weekdays">Dias da semana</span>
+        <div class="ev-days" id="ev-days"></div>
+      </div>
+
+      <div class="ev-rep-extra hidden" id="ev-month-row">
+        <label>
+          <span data-i18n="sched.monthDay">Dia do mês</span>
+          <input type="number" id="ev-monthday" min="1" max="31" value="1" />
+        </label>
+        <p class="muted small" data-i18n="sched.monthHint">
+          Dia 29, 30 ou 31 cai no último dia dos meses mais curtos.
+        </p>
+      </div>
+
+      <span class="ev-lbl" data-i18n="sched.remind">Avisar antes</span>
+      <div class="ev-reminds" id="ev-reminds"></div>
+
+      <label>
+        <span data-i18n="sched.note">Observação</span>
+        <textarea id="ev-note" rows="2" maxlength="500"
+                  data-i18n-ph="sched.notePh" placeholder="Combinar de entrar juntos"></textarea>
+      </label>
+
+      <label class="ev-mute">
+        <input type="checkbox" id="ev-muted" />
+        <span data-i18n="sched.muted">Silenciar os avisos deste item</span>
+      </label>
+
+      <p class="ev-preview" id="ev-preview"></p>
+      <p class="form-error hidden" id="ev-error"></p>
+
+      <div class="modal-actions">
+        <button class="btn danger hidden" id="ev-delete" data-i18n="common.delete">Excluir</button>
+        <span style="flex:1"></span>
+        <button class="btn" id="ev-cancel" data-x-alias data-i18n="common.cancel">Cancelar</button>
+        <button class="btn primary" id="ev-save" data-i18n="common.save">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================= MODAL: EDITOR DE ANOTAÇÃO ======================= -->
+  <div class="modal-backdrop hidden" id="modal-note">
+    <div class="modal note-modal">
+      <h2 id="note-modal-title">Nova anotação</h2>
+
+      <!-- MIOLO QUE ROLA, RODAPÉ ANCORADO.
+           Mesmo padrão do modal de configurações, e pelo mesmo
+           motivo: com os campos novos (tipo, ficha, plano, ligações)
+           o editor passou de 700px e, num monitor 1366x768, os
+           botões Salvar e Cancelar caíam para FORA da tela. O modal
+           rolava, então dava para chegar lá — mas quem não descobre
+           que rola fica preso num editor sem saída. -->
+      <div class="note-scroll">
+
+      <!-- ---------- TIPO ----------
+           Três tipos, um arquivo só. O tipo não cria um sistema
+           novo: ele decide quais campos aparecem abaixo e como o
+           cartão se desenha na lista e na mesa. Tudo continua sendo
+           anotação — mesma busca, mesmo backup, mesmos prints. -->
+      <div class="note-types" id="note-types">
+        <button type="button" class="ntype active" data-ntype="note">
+          <span data-icon="note"></span>
+          <span class="nt-name" data-i18n="notes.typeNote">Nota</span>
+          <span class="nt-sub" data-i18n="notes.typeNoteSub">texto e fotos</span>
+        </button>
+        <button type="button" class="ntype" data-ntype="ficha">
+          <span data-icon="user"></span>
+          <span class="nt-name" data-i18n="notes.typeFicha">Ficha</span>
+          <span class="nt-sub" data-i18n="notes.typeFichaSub">dossiê de jogador</span>
+        </button>
+        <button type="button" class="ntype" data-ntype="raid">
+          <span data-icon="bomb"></span>
+          <span class="nt-name" data-i18n="notes.typeRaid">Plano de raid</span>
+          <span class="nt-sub" data-i18n="notes.typeRaidSub">com a conta junto</span>
+        </button>
+      </div>
+
+      <!-- ---------- FICHA: de quem é ---------- -->
+      <div class="nf-box hidden" id="note-ficha-box">
+        <label class="field">
+          <span data-i18n="notes.fichaPlayer">Jogador</span>
+          <input type="text" id="note-player" maxlength="60" list="note-player-list"
+                 data-i18n-ph="notes.fichaPlayerPh" placeholder="Nome como aparece na lista do servidor" />
+          <datalist id="note-player-list"></datalist>
+        </label>
+        <p class="muted small" data-i18n="notes.fichaPlayerHelp">
+          O servidor devolve só o nome — não existe SteamID na lista de jogadores.
+          Por isso a ficha casa pelo nome; se a pessoa trocar, é só editar aqui.
+        </p>
+        <div class="nf-row">
+          <span class="nf-avatar" id="note-photo-preview"></span>
+          <label class="field nf-photo">
+            <span data-i18n="notes.fichaPhoto">Foto (link)</span>
+            <input type="url" id="note-photo" maxlength="500" placeholder="https://..." />
+          </label>
+        </div>
+        <p class="muted small" data-i18n="notes.fichaPhotoHelp">
+          Mesma regra da foto do time: é um endereço na internet, só http e https.
+          Sem link, fica o ícone escolhido abaixo.
+        </p>
+        <div class="nf-icons" id="note-icon-row"></div>
+      </div>
+
+      <label class="field">
+        <span data-i18n="notes.fieldTitle">Título</span>
+        <input type="text" id="note-title" maxlength="120"
+               data-i18n-ph="ph.noteTitle" placeholder="Ex: base do clã / loja do Zé" />
+      </label>
+
+      <label class="field">
+        <span data-i18n="notes.fieldText">Anotação</span>
+        <textarea id="note-text" rows="6"
+                  data-i18n-ph="ph.noteText" placeholder="Escreva o que quiser lembrar depois..."></textarea>
+      </label>
+      <p class="muted small" data-i18n="notes.richHint">
+        Aceita as tags de cor do jogo: &lt;color=#ff0000&gt;texto&lt;/color&gt;, &lt;b&gt;, &lt;size=20&gt;.
+      </p>
+
+      <!-- ---------- Marcadores citados ----------
+           Uma anotação geral quase sempre fala de um lugar ("a base
+           fica atrás do posto"). Sem isto, esse lugar é texto solto:
+           dá para escrever o nome, não para clicar e ir até lá. -->
+      <div class="note-marks" id="note-marks">
+        <div class="nm-head">
+          <span class="nm-title" data-i18n="notes.marksTitle"><span data-icon="pin"></span> Marcadores citados</span>
+          <button type="button" class="btn-small" id="note-mark-add"
+                  data-i18n="notes.marksAdd"><span data-icon="plus"></span> Citar marcador</button>
+          <button class="help-dot" data-help="notes.marksHelp">?</button>
+        </div>
+        <div class="nm-chips" id="note-mark-chips"></div>
+        <p class="muted small hidden" id="note-mark-empty" data-i18n="notes.marksEmpty">
+          Nenhum marcador citado. Cite um para poder pular do texto direto para o ponto no mapa.
+        </p>
+        <div class="nm-picker hidden" id="note-mark-picker">
+          <input type="text" id="note-mark-search" class="list-search"
+                 data-i18n-ph="notes.marksSearch" placeholder="Buscar marcador pelo nome..." />
+          <div class="nm-results" id="note-mark-results"></div>
+        </div>
+      </div>
+
+      <div class="note-drop" id="note-drop">
+        <div class="note-shots-row">
+          <button class="btn-small" id="note-add-file"><span data-icon="image"></span> <span data-i18n="notes.addFile">Escolher print</span></button>
+          <button class="btn-small" id="note-add-clip"><span data-icon="clipboard"></span> <span data-i18n="notes.addClipboard">Colar da área de transferência</span></button>
+          <button class="btn-small ghost" id="note-open-game"><span data-icon="folder"></span> <span data-i18n="notes.openGameFolder">Prints do jogo</span></button>
+          <button class="help-dot" data-help="notes.shotsHelp">?</button>
+        </div>
+        <div class="shots-grid" id="note-shots"></div>
+        <p class="muted small" id="note-shots-empty" data-i18n="notes.dropHint">
+          Arraste imagens para cá, ou aperte Ctrl+V para colar um print direto.
+        </p>
+      </div>
+
+      <!-- ---------- PLANO DE RAID ----------
+           Não recalcula nada aqui: pega o plano que está montado na
+           aba Raid e guarda o RESULTADO. É de propósito. O plano é
+           uma decisão tomada num momento ("vamos com 6 cargas");
+           recalcular ao abrir faria o texto mudar sozinho quando o
+           catálogo do jogo atualizasse, e o time combinaria uma
+           coisa e leria outra. -->
+      <div class="nr-box hidden" id="note-raid-box">
+        <div class="nr-head">
+          <span class="nr-title"><span data-icon="bomb"></span> <span data-i18n="notes.raidPlan">Plano</span></span>
+          <button type="button" class="btn-small" id="note-raid-pull">
+            <span data-icon="download"></span> <span data-i18n="notes.raidPull">Pegar da calculadora</span>
+          </button>
+          <button type="button" class="btn-small btn-ghost hidden" id="note-raid-clear" data-i18n="common.clear">Limpar</button>
+        </div>
+        <div class="nr-body" id="note-raid-body"></div>
+        <p class="muted small" id="note-raid-empty" data-i18n="notes.raidEmpty">
+          Monte o alvo e as ferramentas na aba Raid e clique em "Pegar da calculadora".
+        </p>
+      </div>
+
+      <!-- ---------- LIGAÇÕES ----------
+           É o que sustenta a mesa de investigação e a linha entre
+           dois nomes na lista de jogadores. -->
+      <div class="nl-box" id="note-links-box">
+        <div class="nl-head">
+          <span class="nl-title"><span data-icon="link"></span> <span data-i18n="notes.links">Ligações</span></span>
+          <button type="button" class="btn-small" id="note-link-add">
+            <span data-icon="plus"></span> <span data-i18n="notes.linkAdd">Ligar a outra</span>
+          </button>
+          <button class="help-dot" data-help="notes.linksHelp">?</button>
+        </div>
+        <div class="nl-chips" id="note-link-chips"></div>
+        <p class="muted small" id="note-link-empty" data-i18n="notes.linksEmpty">
+          Nenhuma ligação. Ligue duas fichas como aliados e a lista de jogadores
+          passa a mostrar a linha entre os dois nomes.
+        </p>
+        <p class="muted small hidden" id="note-link-nosave" data-i18n="notes.linksSaveFirst">
+          Salve a anotação primeiro. Só dá para ligar o que já existe.
+        </p>
+      </div>
+
+      <div class="note-meta-row">
+        <label class="check"><input type="checkbox" id="note-pinned" />
+          <span data-i18n="notes.pinned">Fixar no topo</span></label>
+        <label class="check"><input type="checkbox" id="note-color-on" />
+          <span data-i18n="notes.useColor">Cor</span></label>
+        <input type="color" id="note-color" value="#6ee06e" />
+      </div>
+
+      </div><!-- /.note-scroll -->
+
+      <div class="modal-actions">
+        <button class="btn" id="note-cancel" data-i18n="common.cancel">Cancelar</button>
+        <button class="btn primary" id="note-save" data-i18n="common.save">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: PRINT EM TAMANHO GRANDE ======================= -->
+  <div class="modal-backdrop hidden" id="modal-shot">
+    <div class="modal shot-modal">
+      <div class="shot-stage">
+        <button class="shot-nav prev" id="shot-prev">‹</button>
+        <img id="shot-img" alt="" />
+        <button class="shot-nav next" id="shot-next">›</button>
+      </div>
+      <div class="shot-bar">
+        <span class="muted small" id="shot-count"></span>
+        <span class="muted small" id="shot-size"></span>
+        <span style="flex:1"></span>
+        <button class="btn-small" id="shot-close" data-i18n="common.close">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: CARD DO MARCADOR ======================= -->
+  <!-- ======================= CARD DO MARCADOR ======================= -->
+  <!-- Nome e tipo moram AQUI DENTRO, não numa barra antes do
+       clique: você só sabe o nome do ponto depois de ver onde ele
+       caiu. Ao criar, o card já abre em modo edição. -->
+  <div class="modal-backdrop hidden" id="modal-marker">
+    <div class="modal marker-modal">
+
+      <div class="mkc-cover" id="mkc-cover">
+        <img id="mkc-cover-img" alt="" onerror="this.style.display='none'" />
+        <div class="mkc-cover-empty" id="mkc-cover-empty">
+          <span class="mkc-cover-ico" id="mkc-cover-ico" data-icon="pin"></span>
+        </div>
+        <button class="mkc-cover-btn" id="mkc-cover-pick"><span data-icon="camera"></span> <span data-i18n="markers.cover">Foto de capa</span>
+        </button>
+      </div>
+
+      <div class="mkc-head">
+        <input type="text" id="mkc-name" class="mkc-name-input" maxlength="60"
+               data-i18n-ph="map.markerName" placeholder="Nome do marcador" />
+        <span class="mkc-coords" id="mkc-coords"></span>
+      </div>
+
+      <!-- Nome oficial: travado, com o motivo à vista e uma saída
+           honesta (duplicar) em vez de simplesmente não deixar. -->
+      <div class="mkc-locked hidden" id="mkc-locked">
+        <span data-icon="key"></span>
+        <span class="mkl-txt" data-i18n="markers.officialLocked">
+          Este nome vem do arquivo do mapa e é o que o app usa para dizer onde as coisas ficam.
+        </span>
+        <button class="btn-small" id="mkc-duplicate" data-i18n="markers.duplicate">Criar o meu aqui</button>
+      </div>
+
+      <!-- Em que local do mapa este ponto está. -->
+      <div class="mkc-where hidden" id="mkc-where"></div>
+
+      <div class="mkc-types" id="mkc-types">
+        <button class="type-chip" data-type="location"><span data-icon="pin"></span><span data-i18n="map.tLocation">Local</span></button>
+        <button class="type-chip" data-type="airdrop"><span data-icon="parachute"></span><span data-i18n="map.tAirdrop">Airdrop</span></button>
+        <button class="type-chip" data-type="item"><span data-icon="box"></span><span data-i18n="map.tItem">Item</span></button>
+        <button class="type-chip" data-type="custom"><span data-icon="star"></span><span data-i18n="map.tCustom">Custom</span></button>
+        <button class="type-chip" data-type="base"><span data-icon="home"></span><span data-i18n="map.tBase">Base</span></button>
+      </div>
+
+      <!-- Marcador do tipo Base: abre ou cria o layout da base. -->
+      <div class="mkc-base hidden" id="mkc-base"></div>
+
+      <div class="mkc-badges">
+        <span class="mkc-pill hidden" id="mkc-source"></span>
+        <span style="flex:1"></span>
+        <button class="btn-small" id="mkc-goto" data-i18n="markers.center">Centralizar</button>
+        <button class="btn-small" id="mkc-move" data-i18n="markers.move">Mover</button>
+        <button class="btn-small danger" id="mkc-delete" data-i18n="common.delete">Excluir</button>
+      </div>
+
+      <div id="mkc-notes"></div>
+
+      <div class="modal-actions">
+        <button class="btn" id="mkc-close" data-i18n="common.close">Fechar</button>
+        <button class="btn primary" id="mkc-save" data-i18n="common.save">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: CUSTO DE RAID =======================
+       Os números NÃO estão no código: são lidos dos assets da
+       instalação do Unturned (Bundles/Items/**.dat), os mesmos
+       arquivos que o jogo lê. Por isso a faixa no topo diz de onde
+       vieram — uma tabela chumbada mentiria em qualquer servidor
+       com mod, e não teria como avisar. -->
+  <div class="modal-backdrop hidden" id="modal-raid">
+    <div class="modal raid-modal">
+      <h2><span data-icon="bomb"></span> <span data-i18n="raid.title">Custo de raid</span></h2>
+
+      <div class="raid-topbar">
+        <p class="raid-source" id="raid-source"></p>
+        <button class="btn-small" id="raid-rescan" data-i18n="raid.rescan">Reler do jogo</button>
+        <button class="help-dot" data-help="raid.help">?</button>
+      </div>
+
+      <div class="raid-grid">
+        <!-- Coluna 1: o que raidar -->
+        <section class="raid-col">
+          <h3><span data-icon="target"></span> <span data-i18n="raid.targets">Alvos</span></h3>
+          <div class="raid-selected" id="raid-selected"></div>
+          <p class="muted small" id="raid-selected-empty" data-i18n="raid.selectedEmpty">
+            Escolha abaixo o que você quer derrubar.
+          </p>
+          <div class="raid-tools-row">
+            <input type="text" id="raid-search" class="list-search"
+                   data-i18n-ph="raid.search" placeholder="Buscar porta, parede, baú..." />
+            <span class="muted small" id="raid-catalog-count"></span>
+            <button class="btn-small" id="raid-clear" data-i18n="raid.clear">Limpar</button>
+          </div>
+          <div class="raid-catalog" id="raid-catalog"></div>
+        </section>
+
+        <!-- Coluna 2: com o quê -->
+        <section class="raid-col">
+          <h3><span data-icon="backpack"></span> <span data-i18n="raid.withWhat">Com o quê</span></h3>
+          <p class="muted small raid-note" data-i18n="raid.onlyExplosives">
+            Só explosivos. Marreta e machado têm dano a barricada no arquivo do jogo,
+            mas não derrubam base na prática.
+          </p>
+          <div class="raid-filters" id="raid-filters">
+            <!-- O filtro "só dano direto" saiu: a calculadora agora
+                 lista só explosivo, então ele sempre voltava vazio.
+                 Controle que não faz nada é pior do que controle
+                 nenhum. Ficaram os que separam POR CUSTO. -->
+            <button class="chip on" data-filter="all" data-i18n="raid.fAll">Tudo</button>
+            <button class="chip" data-filter="cargas" data-i18n="raid.fCharges">Só cargas</button>
+            <button class="chip" data-filter="baratos" data-i18n="raid.fCheap">Sem cargas</button>
+          </div>
+          <label class="check raid-stock-toggle">
+            <input type="checkbox" id="raid-stock-on" />
+            <span data-i18n="raid.stockOn">Tenho quantidade limitada</span>
+          </label>
+          <p class="muted small hidden" id="raid-stock-box" data-i18n="raid.stockHint">
+            Escreva quantas unidades você tem de cada item. O plano mistura as ferramentas
+            para caber no que existe na mochila.
+          </p>
+          <div class="raid-tool-list" id="raid-tools"></div>
+        </section>
+
+        <!-- Coluna 3: resultado -->
+        <section class="raid-col result">
+          <h3><span data-icon="clipboard"></span> <span data-i18n="raid.plan">Plano</span></h3>
+          <div class="raid-result" id="raid-result"></div>
+          <div class="raid-result-actions hidden" id="raid-result-actions">
+            <!-- ONDE a nota vai. Antes o plano ia para uma gaveta
+                 invisível ("raid:reports") quando não havia servidor
+                 aberto — salvava, sumia, e não havia tela que o
+                 mostrasse. Escolher o servidor é o que faz o plano
+                 virar uma nota que dá para achar depois. -->
+            <select id="raid-note-server" class="raid-note-server"></select>
+            <button class="btn-small" id="raid-copy" data-i18n="raid.copy">Copiar</button>
+            <button class="btn-small primary" id="raid-save-note" data-i18n="raid.saveNote">
+              Salvar como nota
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" id="raid-close" data-i18n="common.close">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: MINHAS CATEGORIAS ======================= -->
+  <!-- Até três. O limite aparece na tela em vez de o botão só
+       parar de funcionar sem dizer por quê. -->
+  <div class="modal-backdrop hidden" id="modal-marker-cats">
+    <div class="modal cats-modal">
+      <h2 data-i18n="markers.catsTitle">Minhas categorias</h2>
+      <p class="muted small" data-i18n="markers.catsSub">
+        Categorias suas de marcador, além das quatro do app. Valem para todos os mapas.
+      </p>
+
+      <div class="cats-list" id="cats-list"></div>
+
+      <form class="cats-new" id="cats-new">
+        <button type="button" class="cat-emoji-btn" id="cat-emoji" title="Emoji" data-icon="star"></button>
+        <input type="text" id="cat-name" maxlength="20" required
+               data-i18n-ph="markers.catName" placeholder="Nome da categoria (ex: Time)" />
+        <input type="color" id="cat-color" value="#b48ee6" />
+        <button type="submit" class="btn-small primary" id="cat-add" data-i18n="markers.catAdd">Criar</button>
+      </form>
+      <div class="cat-emoji-grid hidden" id="cat-emoji-grid"></div>
+      <p class="muted small" id="cats-limit"></p>
+
+      <div class="modal-actions">
+        <button class="btn" id="cats-close" data-i18n="common.close">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: BACKUP ======================= -->
+  <div class="modal-backdrop hidden" id="modal-backup">
+    <div class="modal backup-modal">
+      <h2 id="backup-title" data-i18n="backup.exportTitle">Exportar backup</h2>
+      <p class="muted small" id="backup-sub" data-i18n="backup.exportSub">
+        Escolha o que vai junto. O arquivo gerado é um .json só — dá para guardar ou mandar para alguém.
+      </p>
+
+      <div class="backup-parts" id="backup-parts">
+        <label class="check"><input type="checkbox" data-part="servers" checked />
+          <span data-i18n="backup.pServers">Servidores</span>
+          <em class="muted small" id="bk-n-servers"></em></label>
+        <label class="check"><input type="checkbox" data-part="folders" checked />
+          <span data-i18n="backup.pFolders">Pastas</span>
+          <em class="muted small" id="bk-n-folders"></em></label>
+        <label class="check"><input type="checkbox" data-part="settings" checked />
+          <span data-i18n="backup.pSettings">Configurações</span>
+          <em class="muted small" id="bk-n-settings"></em></label>
+        <label class="check"><input type="checkbox" data-part="markers" checked />
+          <span data-i18n="backup.pMarkers">Marcadores do mapa</span>
+          <em class="muted small" id="bk-n-markers"></em></label>
+        <label class="check"><input type="checkbox" data-part="notes" checked />
+          <span data-i18n="backup.pNotes">Anotações e prints</span>
+          <em class="muted small" id="bk-n-notes"></em></label>
+        <label class="check"><input type="checkbox" data-part="history" />
+          <span data-i18n="backup.pHistory">Histórico de jogadores</span>
+          <em class="muted small" id="bk-n-history"></em></label>
+      </div>
+
+      <label class="check" id="backup-shots-row"><input type="checkbox" id="backup-shots" checked />
+        <span data-i18n="backup.includeShots">Embutir as imagens dos prints</span>
+        <button class="help-dot" data-help="backup.shotsHelp">?</button></label>
+
+      <div class="backup-servers hidden" id="backup-servers">
+        <div class="bk-srv-head">
+          <label class="check"><input type="checkbox" id="bk-srv-all" checked />
+            <span data-i18n="backup.allServers">Todos os servidores</span></label>
+          <span class="muted small" id="bk-srv-count"></span>
+        </div>
+        <div class="bk-srv-list" id="bk-srv-list"></div>
+      </div>
+
+      <div class="backup-import hidden" id="backup-import">
+        <p class="muted small" data-i18n="backup.importMode">Se algo já existir aqui:</p>
+        <label class="check"><input type="radio" name="bkmode" value="merge" checked />
+          <span data-i18n="backup.modeMerge">Manter o meu (só adiciona o que falta)</span></label>
+        <label class="check"><input type="radio" name="bkmode" value="replace" />
+          <span data-i18n="backup.modeReplace">Usar o do backup (sobrescreve)</span></label>
+      </div>
+
+      <p class="backup-size muted small" id="backup-size"></p>
+
+      <div class="modal-actions">
+        <button class="btn" id="backup-cancel" data-i18n="common.cancel">Cancelar</button>
+        <button class="btn primary" id="backup-go" data-i18n="backup.export">Exportar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: RESET TOTAL ======================= -->
+  <div class="modal-backdrop hidden" id="modal-reset">
+    <div class="modal reset-modal">
+      <h2 class="danger-title" data-i18n="reset.title">Resetar o aplicativo</h2>
+      <p data-i18n="reset.warn">
+        Isso apaga a sua lista de servidores, pastas, marcadores, anotações, prints e configurações.
+        A instalação do Unturned não é tocada.
+      </p>
+
+      <label class="check"><input type="checkbox" id="reset-keep-maps" checked />
+        <span data-i18n="reset.keepMaps">Manter os mapas já importados</span>
+        <button class="help-dot" data-help="reset.keepMapsHelp">?</button></label>
+
+      <p class="muted small" data-i18n="reset.backupFirst">
+        Recomendado: exporte um backup antes.
+      </p>
+      <button class="btn-small" id="reset-backup-first" data-i18n="reset.exportNow">Exportar backup agora</button>
+
+      <label class="field">
+        <span id="reset-type-label" data-i18n="reset.typeToConfirm">Digite RESETAR para confirmar</span>
+        <input type="text" id="reset-confirm" autocomplete="off" spellcheck="false" />
+      </label>
+
+      <div class="modal-actions">
+        <button class="btn" id="reset-cancel" data-i18n="common.cancel">Cancelar</button>
+        <button class="btn danger" id="reset-go" disabled data-i18n="reset.go">Resetar tudo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= PRIMEIRO USO ======================= -->
+  <div class="modal-backdrop hidden" id="modal-welcome">
+    <div class="modal welcome-modal">
+      <div class="wz-steps" id="wz-steps"></div>
+      <div class="wz-body" id="wz-body"></div>
+      <div class="modal-actions wz-actions">
+        <button class="btn-ghost" id="wz-skip" data-i18n="welcome.skip">Pular</button>
+        <span style="flex:1"></span>
+        <button class="btn" id="wz-back" data-i18n="welcome.back">Voltar</button>
+        <button class="btn primary" id="wz-next" data-i18n="welcome.next">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Balão do "?" (info tags) -->
+  <div class="help-bubble hidden" id="help-bubble"></div>
+
+
+  <!-- ======================= CONVITE CRIADO ======================= -->
+  <!-- A senha aparece UMA vez. Depois disto ela não existe em
+       lugar nenhum: guardamos só o scrypt dela. -->
+  <div class="modal-backdrop hidden" id="modal-invite">
+    <div class="modal invite-modal">
+      <h2 data-i18n="team.inviteCreated">Convite criado</h2>
+      <p class="muted small" data-i18n="team.inviteSend">
+        Mande as duas coisas para quem você quer no time. O código diz qual é o
+        time; a senha prova que a pessoa foi convidada.
+      </p>
+
+      <div class="inv-field">
+        <span class="inv-label" data-i18n="team.code">Código</span>
+        <code class="inv-value" id="inv-code"></code>
+        <button class="btn-small" data-copy="inv-code" data-i18n="common.copy">Copiar</button>
+      </div>
+      <div class="inv-field">
+        <span class="inv-label" data-i18n="team.password">Senha</span>
+        <code class="inv-value" id="inv-pass"></code>
+        <button class="btn-small" data-copy="inv-pass" data-i18n="common.copy">Copiar</button>
+      </div>
+
+      <div class="team-warn">
+        <strong data-i18n="team.inviteOnceTitle">A senha não aparece de novo</strong>
+        <p data-i18n="team.inviteOnceBody">
+          Guardamos só o hash dela — nem o app consegue mostrá-la depois. Se
+          perder, revogue este convite e gere outro.
+        </p>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" id="inv-copy-both" data-i18n="team.copyBoth">Copiar os dois</button>
+        <button class="btn primary" id="inv-close" data-i18n="common.close">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= ENTRAR NUM GRUPO ======================= -->
+  <!-- ======================= MODAL: PERGUNTA ======================= -->
+  <!-- Substitui window.prompt() e window.confirm().
+       O Electron NÃO IMPLEMENTA prompt(): a chamada não abre nada e
+       devolve null. Como todo chamador fazia `if (!nome) return;`, o
+       botão simplesmente não fazia nada — sem erro, sem aviso. Foi o
+       que aconteceu com "Criar time", "Renomear" e "Novo canal".
+       Os testes rodam em Chromium puro, onde prompt() funciona, e
+       por isso passavam com o app quebrado.
+       confirm() até funciona no Electron, mas trava a thread e não
+       segue o tema; já que a caixa existe, ela atende os dois. -->
+  <!-- FICHA DO JOGADOR.
+       "Quem é essa pessoa para mim?" — vínculo (aliado/inimigo) e
+       grupo (com quem ela anda) são coisas distintas, e ficam em
+       campos distintos: um grupo rival pode ter dentro dele alguém
+       que você considera conhecido. -->
+  <div class="modal-backdrop hidden" id="modal-ficha">
+    <div class="modal">
+      <h2><span data-i18n="fichas.title">Ficha do jogador</span></h2>
+      <p class="fk-nome" id="ficha-nome"></p>
+      <p class="muted small hidden" id="ficha-alias-aviso"></p>
+
+      <div class="field">
+        <span data-i18n="fichas.link">Vínculo com você</span>
+        <div class="fk-ops" id="ficha-links">
+          <button class="fk-op ally"    data-link="ally"><span data-icon="shield"></span> <span data-i18n="fichas.link_ally">Aliado</span></button>
+          <button class="fk-op neutral" data-link="neutral"><span data-icon="dot"></span> <span data-i18n="fichas.link_neutral">Neutro</span></button>
+          <button class="fk-op enemy"   data-link="enemy"><span data-icon="target"></span> <span data-i18n="fichas.link_enemy">Inimigo</span></button>
+        </div>
+      </div>
+
+      <label class="field">
+        <span data-i18n="fichas.group">Anda com (grupo)</span>
+        <select id="ficha-grupo"></select>
+      </label>
+      <div class="fk-juntos hidden" id="ficha-juntos"></div>
+
+      <label class="field">
+        <span data-i18n="fichas.note">Anotações</span>
+        <textarea id="ficha-nota" rows="4" maxlength="2000"
+                  data-i18n-placeholder="fichas.notePlaceholder"
+                  placeholder="raidou minha base dia 3, anda de helicóptero..."></textarea>
+      </label>
+
+      <!-- O DOSSIÊ.
+           A ficha responde "quem é essa pessoa PARA MIM" (aliado,
+           inimigo, com quem anda) e cabe numa tela pequena, aberta
+           no meio da partida.
+
+           O dossiê é a investigação: fotos, texto longo, e as
+           ligações que desenham a linha entre nomes na lista.
+
+           São duas coisas com ritmos diferentes, e por isso duas
+           telas — mas a ponte tem que existir, senão a pessoa monta
+           a ficha aqui e nunca descobre que o dossiê existe. -->
+      <div class="fk-dossie" id="ficha-dossie">
+        <span class="fkd-txt" id="ficha-dossie-txt"></span>
+        <span style="flex:1"></span>
+        <button class="btn-small" id="ficha-dossie-btn"></button>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn danger hidden" id="ficha-apagar" data-i18n="fichas.delete">Apagar ficha</button>
+        <span style="flex:1"></span>
+        <button class="btn" id="ficha-fechar" data-i18n="common.close">Fechar</button>
+        <button class="btn primary" id="ficha-salvar" data-i18n="common.save">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="modal-ask">
+    <div class="modal modal-sm">
+      <h2 id="ask-title"></h2>
+      <p class="muted small hidden" id="ask-body"></p>
+      <label class="field hidden" id="ask-field">
+        <span id="ask-label"></span>
+        <input type="text" id="ask-input" autocomplete="off" spellcheck="false" maxlength="60" />
+      </label>
+      <!-- Lista de escolha (Ask.pick). Serve para "qual servidor
+           vincular?" e para qualquer pergunta de escolher-um.
+           Escolher da lista JÁ confirma: pedir um clique na opção e
+           outro em "Confirmar" para a mesma decisão é um passo a
+           mais sem informação nova. Por isso o "Confirmar" some
+           quando a pergunta é uma lista. -->
+      <div class="ask-list hidden" id="ask-list"></div>
+      <div class="modal-actions">
+        <button class="btn" id="ask-cancel" data-i18n="common.cancel">Cancelar</button>
+        <button class="btn primary" id="ask-ok" data-i18n="common.confirm">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: TIME (criar / editar) =======================
+       Um formulário só para criar e para editar. Criar com um campo
+       de nome e ir buscar descrição e foto depois, em outro lugar,
+       é o caminho que faz ninguém preencher: o momento em que a
+       pessoa sabe o que o time é, é o momento em que ela o cria. -->
+  <div class="modal-backdrop hidden" id="modal-team-edit">
+    <div class="modal">
+      <h2 id="tedit-title" data-i18n="team.createTitle">Criar time</h2>
+
+      <div class="tedit-top">
+        <span class="team-photo big" id="tedit-preview">?</span>
+        <div class="tedit-fields">
+          <label class="field">
+            <span data-i18n="team.fieldName">Nome</span>
+            <input type="text" id="tedit-name" maxlength="40"
+                   data-i18n-ph="team.fieldNamePh" placeholder="Ex: Os Canadenses" />
+          </label>
+          <label class="field">
+            <span data-i18n="team.fieldPhoto">Foto (link)</span>
+            <input type="url" id="tedit-photo" maxlength="500"
+                   placeholder="https://..." />
+          </label>
+        </div>
+      </div>
+      <p class="muted small" data-i18n="team.photoHelp">
+        A foto é um endereço na internet — o app não hospeda imagem. Cole o link
+        direto de uma imagem (terminando em .png ou .jpg). Só http e https.
+      </p>
+      <p class="err small hidden" id="tedit-photo-err" data-i18n="team.badPhoto">
+        Esse link não serve. Precisa começar com http:// ou https://.
+      </p>
+
+      <label class="field">
+        <span data-i18n="team.fieldDesc">Descrição</span>
+        <textarea id="tedit-desc" rows="3" maxlength="600"
+                  data-i18n-ph="team.fieldDescPh"
+                  placeholder="Do que é este time, quem entra, como funciona..."></textarea>
+      </label>
+
+      <div class="modal-actions">
+        <button class="btn" id="tedit-cancel" data-i18n="common.cancel">Cancelar</button>
+        <button class="btn primary" id="tedit-save" data-i18n="common.save">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= MODAL: MARCADOR DO TIME =======================
+       Colocar um ponto sem sair da aba do time. As coordenadas são
+       digitadas porque é assim que elas chegam: o jogo mostra X/Y/Z
+       na tela e a pessoa copia. Clicar no mapa também funciona (é o
+       botão "escolher no mapa"), mas exige o mapa carregado. -->
+  <div class="modal-backdrop hidden" id="modal-teammark">
+    <div class="modal">
+      <h2 data-i18n="team.markTitle">Colocar marcador</h2>
+      <label class="field">
+        <span data-i18n="team.markName">Nome</span>
+        <input type="text" id="tmk-name" maxlength="60"
+               data-i18n-ph="team.markNamePh" placeholder="Ex: base do clã / estoque" />
+      </label>
+      <div class="field-grid">
+        <label class="field"><span>X</span>
+          <input type="number" id="tmk-x" step="1" /></label>
+        <label class="field"><span>Z</span>
+          <input type="number" id="tmk-z" step="1" /></label>
+      </div>
+      <p class="muted small" data-i18n="team.markHelp">
+        No jogo, o comando /pos mostra a sua posição. X e Z são o primeiro e o
+        terceiro número; o Y é a altura e não entra aqui.
+      </p>
+      <label class="field">
+        <span data-i18n="team.markServer">Servidor</span>
+        <select id="tmk-server"></select>
+      </label>
+      <label class="field">
+        <span data-i18n="notes.fieldText">Anotação</span>
+        <textarea id="tmk-text" rows="2"></textarea>
+      </label>
+      <div class="modal-actions">
+        <button class="btn" id="tmk-cancel" data-i18n="common.cancel">Cancelar</button>
+        <button class="btn primary" id="tmk-save" data-i18n="common.save">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="modal-join">
+    <div class="modal">
+      <h2 data-i18n="team.joinTitle">Entrar num time</h2>
+      <label class="field">
+        <span data-i18n="team.code">Código</span>
+        <input type="text" id="join-code" maxlength="8" autocomplete="off" spellcheck="false"
+               data-i18n-ph="ph.inviteCode" placeholder="ABC234" />
+      </label>
+      <label class="field">
+        <span data-i18n="team.password">Senha</span>
+        <input type="password" id="join-pass" autocomplete="off"
+               data-i18n-ph="ph.invitePassword" placeholder="XXXX-XXXX-XXXX-XXXX" />
+      </label>
+      <p class="modal-error hidden" id="join-error"></p>
+      <div class="modal-actions">
+        <button class="btn" id="join-cancel" data-i18n="common.cancel">Cancelar</button>
+        <button class="btn primary" id="join-confirm" data-i18n="team.join">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="js/icons.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/richtext.js"></script>
+  <script src="js/geoflag.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/steam.js"></script>
+  <script src="js/folders.js"></script>
+  <script src="js/list.js"></script>
+  <script src="js/quickview.js"></script>
+  <script src="js/tracking.js"></script>
+  <script src="js/logview.js"></script>
+  <script src="js/locationIndex.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/markerCats.js"></script>
+  <script src="js/markers.js"></script>
+  <script src="js/raidCalc.js"></script>
+  <script src="js/raid.js"></script>
+  <!-- Three.js r147 (UMD, MIT) para a visão 3D das bases. -->
+  <script src="js/vendor/three.min.js"></script>
+  <script src="js/vendor/OrbitControls.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/bases.js"></script>
+  <script src="js/notes.js"></script>
+  <script src="js/dossier.js"></script>
+  <script src="js/playerLinks.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/backup.js"></script>
+  <script src="js/notifCenter.js"></script>
+  <script src="js/help.js"></script>
+  <script src="js/voice.js"></script>
+  <script src="js/team.js"></script>
+  <script src="js/teamProfile.js"></script>
+  <script src="js/teamNotes.js"></script>
+  <script src="js/teamMap.js"></script>
+  <script src="js/teamView.js"></script>
+  <script src="js/fichas.js"></script>
+  <script src="js/agenda.js"></script>
+  <script src="js/conta.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>

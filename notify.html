@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Unturned+ Notificação</title>
+  <link rel="stylesheet" href="theme.css" />
+  <link rel="stylesheet" href="notify.css" />
+</head>
+<body>
+  <div class="toast-card" id="toast-card">
+    <div class="toast-icon" id="toast-icon" data-icon="bell"></div>
+    <div class="toast-body">
+      <div class="toast-title" id="toast-title">—</div>
+      <div class="toast-sub" id="toast-sub"></div>
+    </div>
+    <div class="toast-bar"><span class="toast-bar-fill" id="toast-bar"></span></div>
+  </div>
+
+  <script src="js/i18n.js"></script>
+  <!-- A janela de aviso desenha ícone própria (entrou, saiu,
+       airdrop, wipe). Sem este arquivo ela voltaria para emoji. -->
+  <script src="js/icons.js"></script>
+  <script src="js/notify.js"></script>
+</body>
+</html>

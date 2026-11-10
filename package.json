@@ -1,0 +1,104 @@
+{
+  "name": "unturned-plus",
+  "version": "1.22.0",
+  "description": "Sistema de Tracking e Monitoramento de Servidores do Unturned",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win portable nsis",
+    "dist:portable": "electron-builder --win portable",
+    "dist:installer": "electron-builder --win nsis",
+    "build": "electron-builder --win",
+    "pack": "electron-builder --dir"
+  },
+  "keywords": [
+    "unturned",
+    "battlemetrics",
+    "tracking",
+    "electron"
+  ],
+  "author": "Unturned+",
+  "license": "MIT",
+  "optionalDependencies": {
+    "gamedig": "^4.3.1"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.unturnedplus.app",
+    "productName": "Unturned+",
+    "copyright": "Unturned+",
+    "directories": {
+      "output": "dist"
+    },
+    "compression": "maximum",
+    "publish": null,
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "icon": "assets/icon.ico",
+      "artifactName": "UnturnedPlus-${version}-setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "UnturnedPlus-${version}-portable.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Unturned+",
+      "deleteAppDataOnUninstall": false
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "queryPort.js",
+      "queryEngine.js",
+      "mapSync.js",
+      "unturnedRules.js",
+      "unturnedLog.js",
+      "geoip.js",
+      "steamWorkshop.js",
+      "steamAccount.js",
+      "unturnedNodes.js",
+      "backupStore.js",
+      "notesStore.js",
+      "syncClient.js",
+      "teamLive.js",
+      "teamStore.js",
+      "teamRoles.js",
+      "teamInvites.js",
+      "teamChat.js",
+      "mediaStore.js",
+      "notifStore.js",
+      "scheduleStore.js",
+      "raidStore.js",
+      "raidFallback.json",
+      "inventoryStore.js",
+      "wsClient.js",
+      "netClient.js",
+      "accountStore.js",
+      "bmScrape.js",
+      "index.html",
+      "overlay.html",
+      "notify.html",
+      "theme.css",
+      "styles.css",
+      "overlay.css",
+      "raid.css",
+      "inventory.css",
+      "notify.css",
+      "js/**/*",
+      "languages/**/*",
+      "!**/*.map",
+      "!tools/**",
+      "!dist/**"
+    ]
+  }
+}

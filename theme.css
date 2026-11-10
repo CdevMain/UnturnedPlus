@@ -1,0 +1,225 @@
+/* ============================================================
+   Unturned+ — Tema "Survival Ops" (tokens compartilhados)
+   Paleta: verde-oliva escuro, verde Unturned, âmbar de alerta
+
+   Este arquivo é a FONTE ÚNICA das cores e medidas do app.
+   É carregado pelas DUAS janelas:
+
+     index.html   -> theme.css + styles.css   (janela principal)
+     overlay.html -> theme.css + overlay.css  (HUD in-game)
+
+   Mudou uma cor aqui, mudou nos dois lugares. Antes o overlay
+   tinha a própria cópia da paleta e ia ficando fora de sintonia
+   a cada ajuste no tema.
+   ============================================================ */
+:root {
+  /* Superfícies */
+  --bg:        #101613;  /* fundo geral */
+  --bg-raise:  #18211c;  /* painéis e cards */
+  --bg-hover:  #1f2b24;
+  --line:      #2b3a31;
+
+  /* Texto */
+  --text:      #e6efe8;
+  --muted:     #8ba394;
+
+  /* Acentos */
+  --accent:    #6ee06e;  /* verde Unturned */
+  --accent-dk: #3aa03a;
+  --accent-ink:#0c130e;  /* texto sobre o verde */
+  --warn:      #e6b450;  /* âmbar: "jogando agora", airdrop */
+  --warn-ink:  #1a1206;  /* texto sobre o âmbar */
+  --danger:    #e05c5c;
+  --fav:       #f2c14e;  /* dourado dos favoritos */
+
+  /* Categorias do visualizador de log (usadas nos dois lados) */
+  --cat-server:   #5cb8e0;
+  --cat-player:   #a98bff;
+  --cat-level:    #e08b5c;
+
+  /* Forma */
+  --radius:      10px;
+  --radius-sm:   8px;
+  --radius-pill: 999px;
+
+  /* Tipografia */
+  --font: "Segoe UI", system-ui, sans-serif;
+  --font-mono: Consolas, "Cascadia Mono", monospace;
+}
+
+/* Reset. Precisa vir do arquivo compartilhado: sem `box-sizing:
+   border-box`, a moldura do overlay (`height: 100vh` + 1px de
+   borda em cima e embaixo) fica 2px mais alta que a janela e o
+   rodapé com os atalhos F8/F9 sai cortado. */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ------------------------------------------------------------
+   Primitivas compartilhadas pelas duas janelas.
+   Só o que aparece nos dois lugares — o resto fica em cada CSS.
+   ------------------------------------------------------------ */
+
+/* Marca "U+" da barra superior / da barra do overlay */
+.brand-mark {
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+/* Selo de status (ONLINE / OFFLINE) */
+.status-pill {
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  background: var(--bg-raise);
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+.status-pill.online  { color: var(--accent); border-color: var(--accent-dk); }
+.status-pill.offline { color: var(--danger); border-color: var(--danger); }
+
+/* Chip "jogando agora" — âmbar pulsante, igual no card e no HUD */
+.live-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--warn);
+  color: var(--warn-ink);
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: livePulse 1.6s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .35; transform: scale(.7); }
+}
+
+/* Bolinha de status ao lado da contagem de jogadores */
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex-shrink: 0;
+}
+.status-dot.online  { background: var(--accent); box-shadow: 0 0 6px rgba(110, 224, 110, .6); }
+.status-dot.offline { background: var(--danger); }
+
+/* IP clicável (copia ao clicar) */
+.copy-ip {
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+  transition: color .15s, border-color .15s;
+}
+.copy-ip:hover { color: var(--accent); border-bottom-color: var(--accent-dk); }
+.copy-ip.copied { color: var(--accent); border-bottom-color: transparent; }
+.copy-ip.copied::after { content: " ✓"; font-weight: 700; }
+.copy-ip.copy-failed { color: var(--danger); }
+
+/* Bandeira do país (geoflag.js) */
+.geo-flag { display: inline-flex; align-items: center; flex-shrink: 0; line-height: 0; }
+.geo-flag img {
+  width: 18px; height: 13px;
+  object-fit: cover; display: block;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .12);
+}
+.geo-flag.geo-md img { width: 24px; height: 18px; border-radius: 3px; }
+.geo-code {
+  font-size: .66rem; font-weight: 800; letter-spacing: .04em;
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: 3px; padding: 1px 4px; color: var(--muted);
+}
+
+/* Rich text do Unturned (richtext.js) */
+.urt { text-shadow: 0 1px 2px rgba(0, 0, 0, .55); }
+.urt-dark { text-shadow: 0 0 3px rgba(255, 255, 255, .55), 0 1px 2px rgba(0, 0, 0, .5); }
+.urt-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.urt-block { line-height: 1.45; word-break: break-word; }
+
+/* Utilitários */
+.hidden { display: none !important; }
+.muted  { color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* ============================================================
+   CHECKBOXES E RÁDIOS
+   ============================================================
+   `accent-color` só repinta o controle nativo: continua pequeno
+   (13px), com o visual do sistema, e some contra o fundo escuro.
+   Aqui o controle é desenhado do zero — mas continua sendo um
+   <input> de verdade, então :checked, foco por teclado, leitores
+   de tela e todo o JS existente seguem funcionando.
+   ============================================================ */
+input[type="checkbox"],
+input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  width: 19px;
+  height: 19px;
+  margin: 0;
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+  background: var(--bg);
+  border: 2px solid var(--line);
+  border-radius: 5px;
+  transition: background .12s, border-color .12s, box-shadow .12s;
+}
+input[type="radio"] { border-radius: 50%; }
+
+input[type="checkbox"]:hover:not(:disabled),
+input[type="radio"]:hover:not(:disabled) { border-color: var(--accent-dk); background: var(--bg-hover); }
+
+/* O "risquinho" é um pseudo-elemento escalado — desenhar com
+   clip-path deixa a marca nítida em qualquer zoom, coisa que um
+   caractere ✓ não garante entre fontes. */
+input[type="checkbox"]::before {
+  content: "";
+  width: 11px; height: 11px;
+  transform: scale(0);
+  transition: transform .12s cubic-bezier(.2, .8, .3, 1.4);
+  background: var(--accent-ink);
+  clip-path: polygon(14% 44%, 0 65%, 42% 100%, 100% 22%, 82% 4%, 40% 62%);
+}
+input[type="radio"]::before {
+  content: "";
+  width: 9px; height: 9px; border-radius: 50%;
+  transform: scale(0);
+  transition: transform .12s cubic-bezier(.2, .8, .3, 1.4);
+  background: var(--accent-ink);
+}
+input[type="checkbox"]:checked,
+input[type="radio"]:checked { background: var(--accent); border-color: var(--accent); }
+input[type="checkbox"]:checked::before,
+input[type="radio"]:checked::before { transform: scale(1); }
+
+/* Foco visível para quem navega por teclado. */
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(110, 224, 110, .3);
+}
+
+input[type="checkbox"]:disabled,
+input[type="radio"]:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Estado indeterminado (usado no "selecionar todos" parcial). */
+input[type="checkbox"]:indeterminate { background: var(--accent-dk); border-color: var(--accent); }
+input[type="checkbox"]:indeterminate::before {
+  transform: scale(1);
+  clip-path: polygon(0 38%, 100% 38%, 100% 62%, 0 62%);
+  background: var(--accent-ink);
+}

@@ -1,0 +1,228 @@
+/* ============================================================
+   raid.css — Calculadora de custo de raid
+
+   Três colunas: o que derrubar, com o quê, e o resultado. A
+   terceira é a que importa, então ela é a mais larga e a única
+   que rola sozinha — as duas primeiras são escolha, a última é
+   leitura.
+   ============================================================ */
+
+.raid-modal {
+  max-width: min(1240px, 96vw);
+  width: 1240px;
+}
+
+.raid-topbar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 4px 0 12px;
+}
+.raid-source {
+  flex: 1; margin: 0; padding: 8px 12px;
+  border-radius: var(--radius-sm); font-size: .78rem; line-height: 1.4;
+  border: 1px solid var(--line); background: var(--bg);
+}
+.raid-source.game     { border-color: var(--accent-dk); color: var(--text); }
+/* O aviso de "valores de reserva" precisa ser impossível de não
+   ver: alguém que confie neles num servidor com mod atravessa o
+   mapa com metade das cargas. */
+.raid-source.fallback { border-color: #e6b450; background: rgba(230,180,80,.08); color: #f0d9a8; }
+.raid-source.empty    { border-color: #e05c5c; background: rgba(224,92,92,.08); color: #f0b8b8; }
+.raid-source.loading  { color: var(--muted); }
+
+.raid-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.25fr;
+  gap: 14px;
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .raid-grid { grid-template-columns: 1fr; }
+}
+.raid-col {
+  display: flex; flex-direction: column; min-width: 0;
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 12px;
+}
+.raid-col h3 {
+  margin: 0 0 10px; font-size: .85rem; color: var(--muted);
+  font-weight: 700; letter-spacing: .02em;
+}
+.raid-col.result { background: var(--bg-raise); }
+
+/* ---------------- Item (linha com ícone) ---------------- */
+.ri {
+  width: 30px; height: 30px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--bg-raise); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); overflow: hidden;
+}
+.ri.sm { width: 26px; height: 26px; }
+.ri.xs { width: 22px; height: 22px; }
+.ri img { width: 100%; height: 100%; object-fit: contain; }
+.ri.emoji { font-size: .95rem; line-height: 1; }
+.ri-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ri-hp, .ri-dmg, .ri-n, .ri-x { font-family: var(--font-mono); font-size: .74rem; color: var(--muted); white-space: nowrap; }
+.ri-n { color: var(--accent); font-size: .85rem; }
+.ri-tier {
+  font-size: .66rem; padding: 2px 7px; border-radius: var(--radius-pill); white-space: nowrap;
+}
+.ri-tier.high { background: rgba(224,92,92,.14); color: #eda0a0; border: 1px solid rgba(224,92,92,.4); }
+.ri-tier.low  { background: rgba(110,224,110,.12); color: #a8e0a8; border: 1px solid rgba(110,224,110,.35); }
+.ri-tag { font-size: .66rem; padding: 2px 6px; border-radius: var(--radius-pill); background: var(--bg-hover); white-space: nowrap; }
+
+/* ---------------- Catálogo ---------------- */
+.raid-tools-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+.raid-tools-row .list-search { flex: 1; min-width: 0; }
+.raid-catalog {
+  display: flex; flex-direction: column; gap: 4px;
+  max-height: 300px; overflow-y: auto;
+}
+.raid-item {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 6px 9px; cursor: pointer; text-align: left;
+  background: var(--bg-raise); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); color: var(--text); font-size: .8rem;
+}
+.raid-item:hover { border-color: var(--accent-dk); background: var(--bg-hover); }
+.raid-item.on { border-color: var(--accent); }
+
+.raid-selected { display: flex; flex-direction: column; gap: 6px; }
+.raid-sel {
+  display: flex; align-items: center; gap: 9px;
+  padding: 6px 9px; font-size: .8rem;
+  background: var(--bg-raise); border: 1px solid var(--accent-dk);
+  border-radius: var(--radius-sm);
+}
+.raid-qty { display: flex; align-items: center; gap: 4px; }
+.raid-qty input {
+  width: 52px; height: 28px; text-align: center;
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-family: var(--font-mono); font-size: .8rem;
+}
+
+/* ---------------- Ferramentas ---------------- */
+.raid-filters { display: flex; gap: 6px; flex-wrap: wrap; padding-bottom: 8px; }
+.raid-filters .chip {
+  padding: 5px 12px; cursor: pointer; font-size: .75rem;
+  background: var(--bg-raise); border: 1px solid var(--line);
+  border-radius: var(--radius-pill); color: var(--muted);
+}
+.raid-filters .chip:hover { background: var(--bg-hover); color: var(--text); }
+.raid-filters .chip.on { background: var(--accent-dk); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
+.raid-stock-toggle { padding: 2px 0 8px; }
+
+.raid-tool-list { display: flex; flex-direction: column; gap: 4px; max-height: 380px; overflow-y: auto; }
+.raid-tool {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 9px; cursor: pointer; font-size: .8rem;
+  background: var(--bg-raise); border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+.raid-tool:hover { background: var(--bg-hover); }
+.raid-tool.on { border-color: var(--accent-dk); }
+.raid-tool input[type="checkbox"] { flex: none; }
+.raid-tool .raid-stock {
+  width: 60px; height: 26px; text-align: center; flex: none;
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-family: var(--font-mono); font-size: .76rem;
+}
+
+/* ---------------- Resultado ---------------- */
+.raid-result { display: flex; flex-direction: column; gap: 10px; max-height: 460px; overflow-y: auto; }
+.raid-empty { padding: 24px 0; text-align: center; }
+
+.raid-bag {
+  padding: 10px 12px;
+  background: var(--bg); border: 1px solid var(--accent-dk);
+  border-radius: var(--radius);
+}
+.raid-bag h4 { margin: 0 0 8px; font-size: .8rem; }
+.raid-bag-items { display: flex; flex-direction: column; gap: 5px; margin-bottom: 6px; }
+.raid-bag-item { display: flex; align-items: center; gap: 8px; font-size: .82rem; }
+.raid-bag-item .ri-note { margin-left: auto; }
+
+.raid-line {
+  padding: 9px 11px;
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.raid-line > header { display: flex; align-items: center; gap: 8px; font-size: .82rem; }
+.raid-line .ri-x { color: var(--accent); font-weight: 700; }
+.raid-best { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 8px; }
+.raid-best-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px 3px 4px;
+  background: var(--accent-dk); border-radius: var(--radius-pill);
+  color: var(--accent-ink); font-size: .78rem;
+}
+.raid-missing {
+  padding: 3px 10px; border-radius: var(--radius-pill); font-size: .74rem;
+  background: rgba(224,92,92,.14); color: #eda0a0; border: 1px solid rgba(224,92,92,.4);
+}
+
+/* As alternativas ficam fechadas: a resposta é uma só, e mostrar
+   seis opções de cara transforma "quanto eu levo?" numa tabela
+   para interpretar. Quem quer comparar abre. */
+.raid-alts { padding-top: 8px; }
+.raid-alts summary { cursor: pointer; font-size: .74rem; color: var(--muted); }
+.raid-alts summary:hover { color: var(--text); }
+.raid-alt {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 6px; margin-top: 4px; font-size: .76rem;
+  border-radius: var(--radius-sm);
+}
+.raid-alt.best { background: var(--bg-hover); }
+.raid-alt b { color: var(--accent); font-family: var(--font-mono); }
+.raid-alt .exact { color: #8fd08f; }
+
+.raid-blocks {
+  padding: 10px 12px;
+  background: rgba(224,92,92,.07); border: 1px solid rgba(224,92,92,.35);
+  border-radius: var(--radius);
+}
+.raid-blocks h4 { margin: 0 0 8px; font-size: .8rem; color: #eda0a0; }
+.raid-block { display: flex; align-items: center; gap: 8px; font-size: .8rem; padding: 3px 0; }
+.raid-why { color: #eda0a0; font-size: .74rem; }
+
+.raid-result-actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 10px; }
+
+/* ------------------------------------------------------------
+   Armadilha conhecida do styles.css: `.modal label` é uma REGRA DE
+   CAMPO (rótulo em cima, campo embaixo) e tem especificidade maior
+   que uma classe solta — então ela vence mesmo escrita depois. Toda
+   linha em linha que é um <label> dentro de um modal precisa
+   repetir `.modal label` no seletor. A .raid-tool já está na lista
+   do styles.css; o que sobra aqui é o tamanho dos campos, que a
+   regra genérica `.modal input` também estica.
+   ------------------------------------------------------------ */
+.modal .raid-qty input[type="number"] {
+  padding: 0; height: 28px; width: 52px;
+  font-size: .8rem; text-align: center;
+}
+.modal .raid-tool input[type="number"].raid-stock {
+  padding: 0 4px; height: 26px; width: 58px;
+  font-size: .76rem; text-align: center;
+}
+.modal .raid-tools-row input[type="text"] { padding: 6px 10px; font-size: .78rem; }
+.modal .raid-col .list-search { padding: 6px 10px; font-size: .78rem; }
+
+/* A linha do alvo escolhido tem cinco coisas competindo por espaço.
+   O nome é a que importa; os controles ficam com largura fixa para
+   não empurrarem o nome para "Met...". */
+.raid-sel { gap: 7px; }
+.raid-sel .ri-name { flex: 1 1 auto; min-width: 90px; }
+.raid-sel .ri-hp { flex: none; }
+.raid-qty { flex: none; }
+.raid-qty .btn-small { padding: 0 8px; height: 28px; min-width: 26px; }
+.raid-sel > .btn-small.danger { flex: none; padding: 0 9px; height: 28px; }
+
+/* O ✕ da linha encostava na borda do cartão. Uma folga de 2px na
+   lista resolve sem mexer no ritmo das outras colunas. */
+.raid-selected { padding-right: 2px; }
+.raid-sel { padding-right: 6px; }
+.raid-sel > .btn-small.danger { padding: 0 7px; min-width: 24px; }
+/* O plano é a coluna que se lê; quanto menos rolagem, melhor. */
+.raid-result { max-height: 560px; }
+.raid-catalog { max-height: 260px; }

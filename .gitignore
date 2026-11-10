@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.log
+config.json
+.env
+Thumbs.db
+.DS_Store
+*.tar.gz
+RUNBOOK-*.md
+js/tools.js
